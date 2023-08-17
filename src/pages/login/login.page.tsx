@@ -9,11 +9,7 @@ function Login() {
     isLoggingIn: false,
     isLoginFailed: false,
   });
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<ILoginPayload>();
+  const {  handleSubmit,  control } = useForm<ILoginPayload>();
   const [messageApi, contextHolder] = message.useMessage();
 
   const handleLogin: SubmitHandler<ILoginPayload> = async (data) => {
