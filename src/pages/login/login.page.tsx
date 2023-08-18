@@ -11,7 +11,8 @@ import LoginFormFields from '../../components/form-signin.component';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
-  const { setValue: setStoredAuthResponse } = useLocalStorage<IApiResponse | null>('auth_response', null);
+  const { setValue: setStoredAuthResponse } =
+    useLocalStorage<IApiResponse | null>('auth_response', null);
 
   const navigate = useNavigate();
   const [state, setState] = useState({
@@ -50,7 +51,7 @@ function Login() {
         isLoggingIn: false,
       }));
 
-      navigate("/a/dashboard", { replace: true })
+      navigate('/a/dashboard', { replace: true });
       return;
     }
 
