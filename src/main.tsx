@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Login from './pages/login/login.page';
+import AdminDashboard from './pages/dasbhoard.page';
 
 const router = createBrowserRouter([
   {
@@ -9,8 +10,8 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: 'about',
-    element: <div>About</div>,
+    path: '/a/dashboard',
+    element: <AdminDashboard />,
   },
 ]);
 

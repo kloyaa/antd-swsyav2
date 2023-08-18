@@ -1,15 +1,25 @@
-import { Row, Input, Button, Checkbox, Card, message } from 'antd';
+import { Row, Checkbox, Card, message } from 'antd';
 import SwsyaClient from '../../utils/http-client.util';
 import { ILoginPayload } from '../../interfaces/login.interface';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
+import useLocalStorage from '../../hooks/useLocalstorage.hook';
+import { IApiResponse } from '../../interfaces/api.interface';
+import { messages } from '../../const/messages.const';
+import { BtnSignIn } from '../../components/btn-signin.component';
+import LoginFormFields from '../../components/form-signin.component';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
+  const { setValue: setStoredAuthResponse } = useLocalStorage<IApiResponse | null>('auth_response', null);
+
+  const navigate = useNavigate();
   const [state, setState] = useState({
     isLoggingIn: false,
     isLoginFailed: false,
   });
-  const {  handleSubmit,  control } = useForm<ILoginPayload>();
+
+  const { handleSubmit, control } = useForm<ILoginPayload>();
   const [messageApi, contextHolder] = message.useMessage();
 
   const handleLogin: SubmitHandler<ILoginPayload> = async (data) => {
@@ -22,10 +32,27 @@ function Login() {
       username: data.username,
       password: data.password,
     };
+
     const loginResponse = await SwsyaClient.post<any, ILoginPayload>(
       '/api/auth/v1/login',
       payload
     );
+
+    if (loginResponse.code === '00') {
+      setStoredAuthResponse({
+        code: loginResponse.code,
+        message: loginResponse.message,
+        token: loginResponse.data,
+      });
+      setState((prev) => ({
+        ...prev,
+        isLoginFailed: false,
+        isLoggingIn: false,
+      }));
+
+      navigate("/a/dashboard", { replace: true })
+      return;
+    }
 
     if (loginResponse.code !== '00') {
       messageApi.error({
@@ -37,14 +64,24 @@ function Login() {
       });
       setState((prev) => ({
         ...prev,
+        isLoggingIn: false,
         isLoginFailed: true,
       }));
+      return;
     }
 
     setState((prev) => ({
       ...prev,
       isLoggingIn: false,
     }));
+
+    messageApi.error({
+      type: 'error',
+      content: messages['500'].message,
+      style: {
+        marginTop: '90vh',
+      },
+    });
   };
 
   useEffect(() => {
@@ -54,7 +91,6 @@ function Login() {
   return (
     <>
       {contextHolder}
-
       <div
         style={{
           display: 'flex',
@@ -70,49 +106,14 @@ function Login() {
               bordered={true}
               style={{ width: 280 }}
             >
-              <p style={{ padding: 0, color: 'GrayText', fontSize: 12 }}>
-                Username or Email
-              </p>
-              <Controller
-                name="username"
+              <LoginFormFields
                 control={control}
-                render={({ field }) => (
-                  <Input
-                    size="middle"
-                    placeholder="Enter"
-                    status={state.isLoginFailed ? 'error' : ''}
-                    {...field}
-                  />
-                )}
-              />
-              <p style={{ padding: 0, color: 'GrayText', fontSize: 12 }}>
-                Password
-              </p>
-              <Controller
-                name="password"
-                control={control}
-                render={({ field }) => (
-                  <Input.Password
-                    size="middle"
-                    placeholder="Enter"
-                    status={state.isLoginFailed ? 'error' : ''}
-                    {...field}
-                  />
-                )}
+                isLoginFailed={state.isLoginFailed}
               />
               <Checkbox onChange={() => {}} style={{ marginTop: 20 }}>
                 Remember me
               </Checkbox>
-              <Button
-                type="primary"
-                size="middle"
-                loading={state.isLoggingIn}
-                style={{ marginTop: 20 }}
-                htmlType="submit"
-                block
-              >
-                Sign in
-              </Button>
+              <BtnSignIn isLoading={state.isLoggingIn} />
             </Card>
           </form>
         </Row>
