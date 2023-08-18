@@ -10,10 +10,10 @@ function AdminDashboard() {
   return (
     <div style={{ background: '#f9f9f9', height: '100vh' }}>
       <NavigationBarAdmin />
-      <div style={{ marginTop: '20px', marginLeft: '20px', marginRight: '20px' }}>
+      <div style={{ marginTop: '20px', marginLeft: '70px', marginRight: '70px' }}>
         <Statistics />
       </div>
-      <div style={{ marginTop: '20px', marginLeft: '20px', marginRight: '20px' }}>
+      <div style={{ marginTop: '20px', marginLeft: '70px', marginRight: '70px' }}>
         <TransactionTable />
       </div>
     </div>
