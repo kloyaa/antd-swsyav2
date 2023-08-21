@@ -11,8 +11,8 @@ import { Menu } from 'antd';
 
 const items: MenuProps['items'] = [
   {
-    label: 'Swerte Saya',
-    key: 'home',
+    label: 'Dashboard',
+    key: 'item-dashboard',
     onClick: () => {
       alert('ss');
     },
@@ -27,11 +27,7 @@ const items: MenuProps['items'] = [
     disabled: true,
   },
   {
-    label: (
-      <a href="https://ant.design" target="_blank" rel="noopener noreferrer">
-        Requests
-      </a>
-    ),
+    label: 'Requests',
     style: {
       marginLeft: 'auto',
     },
@@ -39,21 +35,12 @@ const items: MenuProps['items'] = [
     key: 'item-requests',
   },
   {
-    label: (
-      <a href="https://ant.design" target="_blank" rel="noopener noreferrer">
-        Active Users
-      </a>
-    ),
-
+    label: 'Active Users',
     icon: <TeamOutlined />,
     key: 'item-active-users',
   },
   {
-    label: (
-      <a href="https://ant.design" target="_blank" rel="noopener noreferrer">
-        Activity Logs
-      </a>
-    ),
+    label: 'Activity Logs',
     icon: <FieldTimeOutlined />,
     key: 'item-activity-logs',
   },

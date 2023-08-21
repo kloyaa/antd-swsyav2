@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import NavigationBarAdmin from '../components/nav-admin.component';
-import TransactionTable from '../components/table-transactions.component';
-import Statistics from '../components/stats.component';
+import NavigationBarAdmin from '../../components/nav-admin.component';
+import TransactionTable from '../../components/table-transactions.component';
+import Statistics from '../../components/stats.component';
 
 function AdminDashboard() {
   useEffect(() => {

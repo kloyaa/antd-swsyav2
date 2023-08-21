@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Login from './pages/login/login.page';
-import AdminDashboard from './pages/dasbhoard.page';
+import AdminDashboard from './pages/dashboard/dasbhoard.page';
 
 const router = createBrowserRouter([
   {
