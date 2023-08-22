@@ -54,9 +54,6 @@ function Login() {
 
     try {
       if(getSavedLogin) {
-        console.log({ 
-          content: getSavedLogin.token 
-        })
         loginResponse = await SwsyaClient.post<any, ILoginEncryptedPayload>(API.ecryptedLogin, { 
           content: getSavedLogin.token 
         })
@@ -85,7 +82,10 @@ function Login() {
     if (loginResponse!.code === '00') {
       if(state.isSavedLogin && !getSavedLogin) {
         const encryptLoginResponse = await SwsyaClient.post<any, ILoginPayload>(API.ecryptLogin, payload);
-        setSaveLogin(encryptLoginResponse.data);
+        setSaveLogin({
+          owner: encryptLoginResponse.data.data.owner,
+          token: encryptLoginResponse.data.data.token
+        });
       }
       setAuthResponse({
         code: loginResponse!.code,
@@ -118,6 +118,7 @@ function Login() {
       handleClearLocalStorage(); // Clear saved data
       return;
     }
+
   };
 
   const handleSaveLogin = () => {
