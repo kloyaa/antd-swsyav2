@@ -1,9 +1,12 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { API_BASE_URL } from '../const/api.const';
 
-interface ApiResponse<T = any> {
+interface ApiResponse<T = any, H = any> {
   message: string;
   code: string;
   data?: T;
+  headers?: H;
+  response?: any;
 }
 
 interface ServerResponse<T> {
@@ -49,10 +52,12 @@ class SwsyaClient {
 
       const response: AxiosResponse<ServerResponse<T>> =
         await this.api.request(config);
+
       return {
         message: response.data.message,
         code: response.data.code,
-        data: response.data.data || ('Empty' as any),
+        data: response.data as any || ('Empty' as any),
+        headers: response.headers
       };
     } catch (error: any) {
       return {
@@ -64,7 +69,8 @@ class SwsyaClient {
     }
   }
 
-  async get<T>(endpoint: string): Promise<ApiResponse<T>> {
+  async get<T, P>(endpoint: string, params: P): Promise<ApiResponse<T>> {
+    this.config.params = params;
     this.config.method = 'GET';
     this.config.url = endpoint;
 
@@ -103,5 +109,5 @@ class SwsyaClient {
   }
 }
 
-const swsyaClient = new SwsyaClient('https://swertesaya-api.vercel.app');
+const swsyaClient = new SwsyaClient(API_BASE_URL);
 export default swsyaClient;

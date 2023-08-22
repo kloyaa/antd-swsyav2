@@ -1,21 +1,26 @@
 import { Row, Checkbox, Card, message } from 'antd';
 import SwsyaClient from '../../utils/http-client.util';
-import { ILoginPayload } from '../../interfaces/login.interface';
+import { ILoginEncryptedPayload, ILoginPayload } from '../../interfaces/login.interface';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import useLocalStorage from '../../hooks/useLocalstorage.hook';
-import { IApiResponse } from '../../interfaces/api.interface';
+import { IApiResponse, ISavedLogin } from '../../interfaces/api.interface';
 import { messages } from '../../const/messages.const';
-import { BtnSignIn } from '../../components/btn-signin.component';
+import { BtnNotYou, BtnSignIn } from '../../components/btn-signin.component';
 import LoginFormFields from '../../components/form-signin.component';
 import { useNavigate } from 'react-router-dom';
+import { API } from '../../const/api.const';
 
 function Login() {
-  const { setValue: setStoredAuthResponse } =
+  const { setValue: setAuthResponse, removeValue: removeAuthResponse } =
     useLocalStorage<IApiResponse | null>('auth_response', null);
+
+  const { setValue: setSaveLogin, value: getSavedLogin, removeValue: removeSavedLogin } =
+    useLocalStorage<ISavedLogin | null>('login_token', null);
 
   const navigate = useNavigate();
   const [state, setState] = useState({
+    isSavedLogin: true,
     isLoggingIn: false,
     isLoginFailed: false,
   });
@@ -24,6 +29,17 @@ function Login() {
   const [messageApi, contextHolder] = message.useMessage();
 
   const handleLogin: SubmitHandler<ILoginPayload> = async (data) => {
+    if((data.username === undefined || data.password === undefined) && !getSavedLogin) {
+       messageApi.error({
+        type: 'error',
+        content: "Username and password is required.",
+        style: {
+          marginTop: '90vh',
+        },
+      });
+
+      return
+    }
     setState((prev) => ({
       ...prev,
       isLoggingIn: true,
@@ -34,13 +50,24 @@ function Login() {
       password: data.password,
     };
 
-    const loginResponse = await SwsyaClient.post<any, ILoginPayload>(
-      '/api/auth/v1/login',
-      payload
-    );
+    let loginResponse = null;
+
+    if(getSavedLogin) {
+      loginResponse = await SwsyaClient.post<any, ILoginEncryptedPayload>(API.ecryptedLogin, { 
+        content: getSavedLogin.token 
+      })
+      console.log("AUTHENTICATING VIA ECRYPTION")
+    } else {
+      loginResponse = await SwsyaClient.post<any, ILoginPayload>(API.login, payload)
+      console.log("AUTHENTICATING VIA STANDARD LOGIN")
+    }
 
     if (loginResponse.code === '00') {
-      setStoredAuthResponse({
+      if(state.isSavedLogin && !getSavedLogin) {
+        const encryptLoginResponse = await SwsyaClient.post<any, ILoginPayload>(API.ecryptLogin, payload);
+        setSaveLogin(encryptLoginResponse.data);
+      }
+      setAuthResponse({
         code: loginResponse.code,
         message: loginResponse.message,
         token: loginResponse.data,
@@ -68,6 +95,7 @@ function Login() {
         isLoggingIn: false,
         isLoginFailed: true,
       }));
+      handleClearLocalStorage(); // Clear saved data
       return;
     }
 
@@ -85,8 +113,22 @@ function Login() {
     });
   };
 
+  const handleSaveLogin = () => {
+    setState((prev) => ({ ...prev, isSavedLogin: !state.isSavedLogin }))
+  }
+
+  const handleClearSaveLogin = () => {
+    removeSavedLogin();
+  }
+
+  const handleClearLocalStorage = () => {
+    removeAuthResponse();
+    removeSavedLogin();
+  }
+
   useEffect(() => {
     document.title = 'Login | Swerte Saya';
+    removeAuthResponse(); // Remove existing token
   }, []);
 
   return (
@@ -103,18 +145,28 @@ function Login() {
         <Row justify="center">
           <form onSubmit={handleSubmit(handleLogin)}>
             <Card
-              title="Swerte Saya | Login"
+              title={`${getSavedLogin ? `Welcome Back, ${getSavedLogin.owner}!` : "Swerte Saya | Login"}`}
               bordered={true}
               style={{ width: 280 }}
             >
+              { getSavedLogin ? <div>
+                Your presence is recognized. Would you like to proceed with signing in? 
+                <BtnSignIn title={"Let's go!"} isLoading={state.isLoggingIn} />
+                <BtnNotYou 
+                  event={() => handleClearSaveLogin()}
+                  title={getSavedLogin ? `Not ${getSavedLogin.owner}` : ""}/>
+                </div> : <div>
               <LoginFormFields
                 control={control}
                 isLoginFailed={state.isLoginFailed}
               />
-              <Checkbox onChange={() => {}} style={{ marginTop: 20 }}>
+              <Checkbox onChange={() => handleSaveLogin()} style={{ marginTop: 20 }} checked={state.isSavedLogin}>
                 Remember me
               </Checkbox>
               <BtnSignIn isLoading={state.isLoggingIn} />
+              </div>}
+              
+            
             </Card>
           </form>
         </Row>

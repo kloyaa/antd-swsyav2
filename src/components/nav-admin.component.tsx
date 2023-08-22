@@ -8,86 +8,90 @@ import {
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
-const items: MenuProps['items'] = [
-  {
-    label: 'Dashboard',
-    key: 'item-dashboard',
-    onClick: () => {
-      alert('ss');
-    },
-    style: {
-      fontWeight: 'bold',
-    },
-  },
-  {
-    label: 'Statement of Account',
-    key: 'item-soa',
-    icon: <CalendarOutlined />,
-    disabled: true,
-  },
-  {
-    label: 'Requests',
-    style: {
-      marginLeft: 'auto',
-    },
-    icon: <MailOutlined />,
-    key: 'item-requests',
-  },
-  {
-    label: 'Active Users',
-    icon: <TeamOutlined />,
-    key: 'item-active-users',
-  },
-  {
-    label: 'Activity Logs',
-    icon: <FieldTimeOutlined />,
-    key: 'item-activity-logs',
-  },
-  {
-    label: 'Settings',
-    key: 'SettingsMenu',
-    icon: <SettingOutlined />,
-    children: [
-      {
-        type: 'group',
-        label: 'Account',
-        children: [
-          {
-            label: 'Change Password',
-            key: 'setting:3',
-          },
-          {
-            label: 'Sign out',
-            key: 'setting:4',
-          },
-        ],
-      },
-      {
-        type: 'group',
-        label: 'System',
-        children: [
-          {
-            label: 'Maintenance Mode',
-            key: 'setting:1',
-          },
-          {
-            label: 'Sign out',
-            key: 'setting:2',
-          },
-        ],
-      },
-    ],
-  },
-];
-
-const App: React.FC = () => {
+const AdminNavbar: React.FC = () => {
+  const navigate = useNavigate();
   const [current, setCurrent] = useState('home');
 
   const onClick: MenuProps['onClick'] = (e) => {
     console.log('click ', e);
     setCurrent(e.key);
   };
+
+  const items: MenuProps['items'] = [
+    {
+      label: 'Dashboard',
+      key: 'item-dashboard',
+      onClick: () => navigate("/a/dashboard", { replace: true }),
+      style: {
+        fontWeight: 'bold',
+      },
+    },
+    {
+      label: 'Statement of Account',
+      key: 'item-soa',
+      icon: <CalendarOutlined />,
+      disabled: true,
+    },
+    {
+      label: 'Requests',
+      style: {
+        marginLeft: 'auto',
+      },
+      icon: <MailOutlined />,     
+      onClick: () => navigate("/a/requests", { replace: true }),
+      key: 'item-requests',
+    },
+    {
+      label: 'Active Users',
+      icon: <TeamOutlined />,
+      onClick: () => navigate("/a/users", { replace: true }),
+      key: 'item-active-users',
+    },
+    {
+      label: 'Activity Logs',
+      icon: <FieldTimeOutlined />,
+      onClick: () => navigate("/a/activities", { replace: true }),
+      key: 'item-activity-logs',
+    },
+    {
+      label: 'Settings',
+      key: 'SettingsMenu',
+      icon: <SettingOutlined />,
+      children: [
+        {
+          type: 'group',
+          label: 'Account',
+          children: [
+            {
+              label: 'Change Password',
+              key: 'setting:3',
+            },
+            {
+              label: 'Sign out',
+              key: 'setting:4',
+            },
+          ],
+        },
+        {
+          type: 'group',
+          label: 'System',
+          children: [
+            {
+              label: 'Maintenance Mode',
+              key: 'setting:1',
+            },
+            {
+              label: 'Sign out',
+              key: 'setting:2',
+              onClick: () => navigate("/", { replace: true }),
+            },
+          ],
+        },
+      ],
+    },
+  ];
 
   return (
     <Menu
@@ -99,4 +103,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default AdminNavbar;

@@ -3,3 +3,8 @@ export interface IApiResponse<T = any> {
   code: any;
   [key: string]: T;
 }
+
+export interface ISavedLogin {
+  owner: string;
+  token: string;
+}

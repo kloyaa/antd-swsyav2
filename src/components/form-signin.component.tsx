@@ -1,9 +1,9 @@
 import React from 'react';
 import { Input } from 'antd';
-import { Controller } from 'react-hook-form';
+import { Control, Controller } from 'react-hook-form';
 
 interface LoginFormFieldsProps {
-  control: any;
+  control: Control<any>;
   isLoginFailed: boolean;
 }
 
