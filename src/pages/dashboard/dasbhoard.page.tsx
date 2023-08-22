@@ -103,6 +103,7 @@ function AdminDashboard() {
     txnCount: 0,
     swtCount: 0,
     stlCount: 0,
+    txnRevenue: 0,
     transactions: [],
     sessionExpired: false,
     isVerifyingToken: false
@@ -115,6 +116,7 @@ function AdminDashboard() {
 
     setState((prev) => ({
       ...prev,
+      txnRevenue: Number(getTransactionsResp.headers["swsya-txn-revenue"]) || 0,
       stlCount: Number(getTransactionsResp.headers["swsya-stl-count"]) || 0,
       swtCount:  Number(getTransactionsResp.headers["swsya-swt-count"]) || 0,
       txnCount:  Number(getTransactionsResp.headers["swsya-txn-count"]) || 0,
@@ -172,6 +174,7 @@ function AdminDashboard() {
       <NavigationBarAdmin />
       <div style={{ marginTop: '20px', marginLeft: '70px', marginRight: '70px' }}>
         <Statistics 
+          txnRevenue={state.txnRevenue}
           stlCount={state.stlCount}
           swtTotal={state.swtCount}
           txnCount={state.txnCount}
