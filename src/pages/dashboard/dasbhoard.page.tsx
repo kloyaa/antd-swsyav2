@@ -8,9 +8,17 @@ import { IApiResponse } from '../../interfaces/api.interface';
 import useLocalStorage from '../../hooks/useLocalstorage.hook';
 import { currency } from '../../utils/converter.util';
 import type { ColumnsType } from 'antd/es/table';
-import { TxnTableContent } from '../../interfaces/transaction.interface';
-import { Modal } from 'antd';
+import { ITransaction, TxnTableContent } from '../../interfaces/transaction.interface';
+import { Button, Modal } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { EyeOutlined } from '@ant-design/icons';
+
+
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime'; // Import the relativeTime plugin to display relative time
+import 'dayjs/locale/en'; // Import the English locale to display month names in English
+dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
+dayjs.locale('en'); // Set the locale to English
 
 interface getTransactionsParams { 
   schedule?: string;
@@ -18,78 +26,75 @@ interface getTransactionsParams {
   time?: string;
 }
 
+interface IState {
+  txnTotal: number,
+  txnCount: number,
+  swtCount: number,
+  stlCount: number,
+  txnRevenue: number,
+  transactions: ITransaction[],
+  sessionExpired: boolean,
+  isVerifyingToken: boolean,
+  isFetchingTransactions: boolean,
+}
+
 const columns: ColumnsType<TxnTableContent> = [
   {
-    title: 'Teller',
-    dataIndex: 'teller',
+    title: 'Reference',
+    dataIndex: 'item-reference',
     filterMode: 'tree',
     filterSearch: true,
-    filters: [
-        // ...
-    ],
-    onFilter: (value: string | number | boolean, record) =>
-      record.name.includes(String(value)),
-    width: '30%',
+    width: '8.5%',
   },
   {
-    title: 'Address',
-    dataIndex: 'address',
-    filters: [
-      // ...
-    ],
-    onFilter: (value: string | number | boolean, record) =>
-      record.address.startsWith(String(value)),
+    title: 'Game',
+    dataIndex: 'item-game',
+    filterMode: 'tree',
     filterSearch: true,
-    width: '40%',
+    width: '3%',
+    align:"center"
+  },
+  {
+    title: 'Teller',
+    dataIndex: 'item-teller',
+    filterMode: 'tree',
+    filterSearch: true,
+    width: '12.5%',
+  },
+  {
+    title: 'Combination',
+    dataIndex: 'item-combination',
+    filterMode: 'tree',
+    filterSearch: true,
+    width: '26%',
+  },
+  {
+    title: 'Time',
+    dataIndex: 'item-time',
+    filterMode: 'tree',
+    filterSearch: true,
+    width: '12.5%',
+  },
+  {
+    title: 'Schedule',
+    dataIndex: 'item-schedule',
+    filterMode: 'tree',
+    filterSearch: true,
+    width: '12.5%',
   },
   {
     title: 'Amount',
-    dataIndex: 'amount',
-    sorter: (a, b) => parseInt(a.amount.substring(1, a.amount.length -3 )) - parseInt(b.amount.substring(1, b.amount.length -3 )) ,
+    dataIndex: 'item-amount',
+    filterMode: 'tree',
+    filterSearch: true,
+    width: '12.5%',
   },
   {
-    
-    title: 'Tekker',
-    dataIndex: 'teller',
-    sorter: (a, b) => parseInt(a.amount.substring(1, a.amount.length -3 )) - parseInt(b.amount.substring(1, b.amount.length -3 )) ,
-  },
-  {
-    
-    title: 'Amount',
-    dataIndex: 'amount',
-    sorter: (a, b) => parseInt(a.amount.substring(1, a.amount.length -3 )) - parseInt(b.amount.substring(1, b.amount.length -3 )) ,
-  },
-
-];
-
-const data: TxnTableContent[] = [
-  {
-    key: '1',
-    name: 'John Brown',
-    amount: currency.format(32),    
-    teller: 'Jim Green',
-    address: 'New York No. 1 Lake Park',
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    teller: 'Jim Green',
-    amount: currency.format(100),
-    address: 'London No. 1 Lake Park',
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    amount: currency.format(50),
-    teller: 'Jim Green',
-    address: 'Sydney No. 1 Lake Park',
-  },
-  {
-    key: '4',
-    teller: 'Jim Green',
-    name: 'Jim Red',
-    amount: currency.format(63),
-    address: 'London No. 2 Lake Park',
+    title: 'Details',
+    dataIndex: 'item-details',
+    filterMode: 'tree',
+    filterSearch: true,
+    width: '12.5%',
   },
 ];
 
@@ -98,7 +103,7 @@ function AdminDashboard() {
     useLocalStorage<IApiResponse | null>('auth_response', null);
   
   const navigate = useNavigate();
-  const [state, setState] = useState({
+  const [state, setState] = useState<IState>({
     txnTotal: 0,
     txnCount: 0,
     swtCount: 0,
@@ -106,13 +111,30 @@ function AdminDashboard() {
     txnRevenue: 0,
     transactions: [],
     sessionExpired: false,
-    isVerifyingToken: false
+    isVerifyingToken: false,
+    isFetchingTransactions: false
   });
 
   const handleGetTransactions = async () => {
+    setState((prev) => ({
+      ...prev,
+      isFetchingTransactions: true
+    }))
     const getTransactionsResp = await SwsyaClient
       .setAuthToken(getAuthResponse!.token.data)    
       .get<any, getTransactionsParams>(API.transactions, {})
+
+    const transformedData = getTransactionsResp.data.map((item:ITransaction) => ({
+      'key': item._id,
+      'item-reference': item.reference,
+      'item-game': item.game,
+      'item-teller': `${item.profile.firstName} ${item.profile.lastName}`,
+      'item-combination': item.content.map((contentItem : any) => contentItem.number).join(', '),
+      'item-time': item.time,
+      'item-schedule': dayjs(item.schedule).format("MMMM DD"),
+      'item-amount': currency.format(item.content.reduce((total: any, contentItem: any) => total + contentItem.amount, 0),),
+      'item-details': <Button type="dashed" shape="default" icon={<EyeOutlined />} size={"small"}>View more details</Button>
+    }));
 
     setState((prev) => ({
       ...prev,
@@ -121,7 +143,8 @@ function AdminDashboard() {
       swtCount:  Number(getTransactionsResp.headers["swsya-swt-count"]) || 0,
       txnCount:  Number(getTransactionsResp.headers["swsya-txn-count"]) || 0,
       txnTotal:  Number(getTransactionsResp.headers["swsya-txn-total"]) || 0,
-      transactions: getTransactionsResp.data
+      transactions: transformedData,
+      isFetchingTransactions: false
     }))
   }
 
@@ -183,7 +206,8 @@ function AdminDashboard() {
       <div style={{ marginTop: '20px', marginLeft: '70px', marginRight: '70px' }}>
         <TransactionTable 
           columns={columns}
-          data={data}/>
+          data={state.transactions}
+          loading={state.isFetchingTransactions}/>
       </div>
     </div>
   </>

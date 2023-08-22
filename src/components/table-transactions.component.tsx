@@ -4,7 +4,7 @@ import { TxnTableContent } from '../interfaces/transaction.interface';
 
 interface ITransactionTable {
   columns: ColumnsType<TxnTableContent>, 
-  data: TxnTableContent[],
+  data: any[],
   loading?: boolean
 }
 
