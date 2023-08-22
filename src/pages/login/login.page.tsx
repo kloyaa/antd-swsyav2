@@ -112,7 +112,6 @@ function Login() {
         isLoggingIn: false,
         isLoginFailed: true,
       }));
-      handleClearLocalStorage(); // Clear saved data
       return;
     }
   };
@@ -125,10 +124,10 @@ function Login() {
     removeSavedLogin();
   }
 
-  const handleClearLocalStorage = () => {
-    removeAuthResponse();
-    removeSavedLogin();
-  }
+  // const handleClearLocalStorage = () => {
+  //   removeAuthResponse();
+  //   removeSavedLogin();
+  // }
 
   useEffect(() => {
     document.title = 'Login | Swerte Saya';
