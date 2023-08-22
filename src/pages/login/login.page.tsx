@@ -54,6 +54,9 @@ function Login() {
 
     try {
       if(getSavedLogin) {
+        console.log({ 
+          content: getSavedLogin.token 
+        })
         loginResponse = await SwsyaClient.post<any, ILoginEncryptedPayload>(API.ecryptedLogin, { 
           content: getSavedLogin.token 
         })
@@ -112,6 +115,7 @@ function Login() {
         isLoggingIn: false,
         isLoginFailed: true,
       }));
+      handleClearLocalStorage(); // Clear saved data
       return;
     }
   };
@@ -124,10 +128,10 @@ function Login() {
     removeSavedLogin();
   }
 
-  // const handleClearLocalStorage = () => {
-  //   removeAuthResponse();
-  //   removeSavedLogin();
-  // }
+  const handleClearLocalStorage = () => {
+    removeAuthResponse();
+    removeSavedLogin();
+  }
 
   useEffect(() => {
     document.title = 'Login | Swerte Saya';
