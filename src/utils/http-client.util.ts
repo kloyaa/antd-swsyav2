@@ -93,7 +93,7 @@ class SwsyaClient {
     return this.performRequest<T>(this.config);
   }
 
-  async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async put<T, D>(endpoint: string, data?: D): Promise<ApiResponse<T>> {
     this.config.method = 'PUT';
     this.config.url = endpoint;
     this.config.data = data;

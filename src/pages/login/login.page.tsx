@@ -57,10 +57,8 @@ function Login() {
         loginResponse = await SwsyaClient.post<any, ILoginEncryptedPayload>(API.ecryptedLogin, { 
           content: getSavedLogin.token 
         })
-        console.log("AUTHENTICATING VIA ECRYPTION")
       } else {
         loginResponse = await SwsyaClient.post<any, ILoginPayload>(API.login, payload)
-        console.log("AUTHENTICATING VIA STANDARD LOGIN")
       }
     } catch (error) {
       setState((prev) => ({

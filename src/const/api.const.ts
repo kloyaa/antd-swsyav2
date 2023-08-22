@@ -4,12 +4,20 @@ export const API_BASE_URL = import.meta.env.VITE_ENV === "development" ?
 
 
 export const API = {
+    // Authentication related
     login: `${API_BASE_URL}/api/auth/v1/login`,
     ecryptLogin: `${API_BASE_URL}/api/auth/v1/login/ecrypt`,
     ecryptedLogin: `${API_BASE_URL}/api/auth/v1/login/encrypted`,
     verifyToken: `${API_BASE_URL}/api/auth/v1/token/verify`,
+    
+    // User related
+    users: `${API_BASE_URL}/api/clients/v1/profiles`,
 
-    transactions:  `${API_BASE_URL}/api/transaction/v1/all`
+    // Transactions related
+    transactions:  `${API_BASE_URL}/api/transaction/v1/all`,
+
+    // Employee related
+    updateUserStatus: `${API_BASE_URL}/api/employee/v1/profile-verification`,
 }
 
 export const API_GET_PROFILES = `${API_BASE_URL}/api/clients/v1/profiles`;

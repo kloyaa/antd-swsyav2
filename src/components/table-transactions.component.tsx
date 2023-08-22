@@ -4,7 +4,8 @@ import { TxnTableContent } from '../interfaces/transaction.interface';
 
 interface ITransactionTable {
   columns: ColumnsType<TxnTableContent>, 
-  data: TxnTableContent[]
+  data: TxnTableContent[],
+  loading?: boolean
 }
 
 const onChange: TableProps<TxnTableContent>['onChange'] = (
@@ -17,7 +18,15 @@ const onChange: TableProps<TxnTableContent>['onChange'] = (
 };
 
 const TransactionTable = (args: ITransactionTable) => (
-  <Table  size="small"  columns={args.columns} dataSource={args.data} onChange={onChange} />
+  <Table 
+    size="small" 
+    columns={args.columns} 
+    dataSource={args.data} 
+    onChange={onChange} 
+    pagination={{ position: ['bottomCenter'] }}
+    loading={args.loading || false}
+    bordered={true}
+   />
 );
 
 export default TransactionTable;

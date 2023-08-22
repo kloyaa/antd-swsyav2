@@ -8,7 +8,7 @@ interface IStatistics {
   stlCount: number
   txnRevenue: number
 }
-const formatter = (value: any) => <CountUp end={value} separator=","  duration={10}/>;
+const formatter = (value: any) => <CountUp end={value} separator=","  duration={4}/>;
 
 const Statistics = (data: IStatistics) => (
   <Row style={{ justifyContent: "space-between"}}>
