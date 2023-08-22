@@ -52,25 +52,42 @@ function Login() {
 
     let loginResponse = null;
 
-    if(getSavedLogin) {
-      loginResponse = await SwsyaClient.post<any, ILoginEncryptedPayload>(API.ecryptedLogin, { 
-        content: getSavedLogin.token 
-      })
-      console.log("AUTHENTICATING VIA ECRYPTION")
-    } else {
-      loginResponse = await SwsyaClient.post<any, ILoginPayload>(API.login, payload)
-      console.log("AUTHENTICATING VIA STANDARD LOGIN")
+    try {
+      if(getSavedLogin) {
+        loginResponse = await SwsyaClient.post<any, ILoginEncryptedPayload>(API.ecryptedLogin, { 
+          content: getSavedLogin.token 
+        })
+        console.log("AUTHENTICATING VIA ECRYPTION")
+      } else {
+        loginResponse = await SwsyaClient.post<any, ILoginPayload>(API.login, payload)
+        console.log("AUTHENTICATING VIA STANDARD LOGIN")
+      }
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        isLoginFailed: false,
+        isLoggingIn: false,
+      }));
+      messageApi.error({
+        type: 'error',
+        content: messages['500'].message,
+        style: {
+          marginTop: '90vh',
+        },
+      });
+
+      return;
     }
 
-    if (loginResponse.code === '00') {
+    if (loginResponse!.code === '00') {
       if(state.isSavedLogin && !getSavedLogin) {
         const encryptLoginResponse = await SwsyaClient.post<any, ILoginPayload>(API.ecryptLogin, payload);
         setSaveLogin(encryptLoginResponse.data);
       }
       setAuthResponse({
-        code: loginResponse.code,
-        message: loginResponse.message,
-        token: loginResponse.data,
+        code: loginResponse!.code,
+        message: loginResponse!.message,
+        token: loginResponse!.data,
       });
       setState((prev) => ({
         ...prev,
@@ -82,10 +99,10 @@ function Login() {
       return;
     }
 
-    if (loginResponse.code !== '00') {
+    if (loginResponse!.code !== '00') {
       messageApi.error({
         type: 'error',
-        content: loginResponse.message,
+        content: loginResponse!.message,
         style: {
           marginTop: '90vh',
         },
@@ -98,19 +115,6 @@ function Login() {
       handleClearLocalStorage(); // Clear saved data
       return;
     }
-
-    setState((prev) => ({
-      ...prev,
-      isLoggingIn: false,
-    }));
-
-    messageApi.error({
-      type: 'error',
-      content: messages['500'].message,
-      style: {
-        marginTop: '90vh',
-      },
-    });
   };
 
   const handleSaveLogin = () => {
