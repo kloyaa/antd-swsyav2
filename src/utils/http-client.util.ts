@@ -56,8 +56,8 @@ class SwsyaClient {
       return {
         message: response.data.message,
         code: response.data.code,
-        data: response.data as any || ('Empty' as any),
-        headers: response.headers
+        data: (response.data as any) || ('Empty' as any),
+        headers: response.headers,
       };
     } catch (error: any) {
       return {

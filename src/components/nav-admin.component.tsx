@@ -15,7 +15,6 @@ const AdminNavbar: React.FC = () => {
   const [current, setCurrent] = useState('home');
 
   const onClick: MenuProps['onClick'] = (e) => {
-    console.log('click ', e);
     setCurrent(e.key);
   };
 
@@ -23,7 +22,7 @@ const AdminNavbar: React.FC = () => {
     {
       label: 'Dashboard',
       key: 'item-dashboard',
-      onClick: () => navigate("/a/dashboard", { replace: true }),
+      onClick: () => navigate('/a/dashboard', { replace: true }),
       style: {
         fontWeight: 'bold',
       },
@@ -39,20 +38,20 @@ const AdminNavbar: React.FC = () => {
       style: {
         marginLeft: 'auto',
       },
-      icon: <MailOutlined />,     
-      onClick: () => navigate("/a/requests", { replace: true }),
+      icon: <MailOutlined />,
+      onClick: () => navigate('/a/requests', { replace: true }),
       key: 'item-requests',
     },
     {
       label: 'Active Users',
       icon: <TeamOutlined />,
-      onClick: () => navigate("/a/users", { replace: true }),
+      onClick: () => navigate('/a/users', { replace: true }),
       key: 'item-active-users',
     },
     {
       label: 'Activity Logs',
       icon: <FieldTimeOutlined />,
-      onClick: () => navigate("/a/activities", { replace: true }),
+      onClick: () => navigate('/a/activities', { replace: true }),
       key: 'item-activity-logs',
     },
     {
@@ -85,7 +84,7 @@ const AdminNavbar: React.FC = () => {
             {
               label: 'Sign out',
               key: 'setting:2',
-              onClick: () => navigate("/", { replace: true }),
+              onClick: () => navigate('/', { replace: true }),
             },
           ],
         },

@@ -1,6 +1,9 @@
 import { Row, Checkbox, Card, message } from 'antd';
 import SwsyaClient from '../../utils/http-client.util';
-import { ILoginEncryptedPayload, ILoginPayload } from '../../interfaces/login.interface';
+import {
+  ILoginEncryptedPayload,
+  ILoginPayload,
+} from '../../interfaces/login.interface';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import useLocalStorage from '../../hooks/useLocalstorage.hook';
@@ -15,8 +18,11 @@ function Login() {
   const { setValue: setAuthResponse, removeValue: removeAuthResponse } =
     useLocalStorage<IApiResponse | null>('auth_response', null);
 
-  const { setValue: setSaveLogin, value: getSavedLogin, removeValue: removeSavedLogin } =
-    useLocalStorage<ISavedLogin | null>('login_token', null);
+  const {
+    setValue: setSaveLogin,
+    value: getSavedLogin,
+    removeValue: removeSavedLogin,
+  } = useLocalStorage<ISavedLogin | null>('login_token', null);
 
   const navigate = useNavigate();
   const [state, setState] = useState({
@@ -29,16 +35,19 @@ function Login() {
   const [messageApi, contextHolder] = message.useMessage();
 
   const handleLogin: SubmitHandler<ILoginPayload> = async (data) => {
-    if((data.username === undefined || data.password === undefined) && !getSavedLogin) {
-       messageApi.error({
+    if (
+      (data.username === undefined || data.password === undefined) &&
+      !getSavedLogin
+    ) {
+      messageApi.error({
         type: 'error',
-        content: "Username and password is required.",
+        content: 'Username and password is required.',
         style: {
           marginTop: '90vh',
         },
       });
 
-      return
+      return;
     }
     setState((prev) => ({
       ...prev,
@@ -53,12 +62,18 @@ function Login() {
     let loginResponse = null;
 
     try {
-      if(getSavedLogin) {
-        loginResponse = await SwsyaClient.post<any, ILoginEncryptedPayload>(API.ecryptedLogin, { 
-          content: getSavedLogin.token 
-        })
+      if (getSavedLogin) {
+        loginResponse = await SwsyaClient.post<any, ILoginEncryptedPayload>(
+          API.ecryptedLogin,
+          {
+            content: getSavedLogin.token,
+          }
+        );
       } else {
-        loginResponse = await SwsyaClient.post<any, ILoginPayload>(API.login, payload)
+        loginResponse = await SwsyaClient.post<any, ILoginPayload>(
+          API.login,
+          payload
+        );
       }
     } catch (error) {
       setState((prev) => ({
@@ -78,11 +93,14 @@ function Login() {
     }
 
     if (loginResponse!.code === '00') {
-      if(state.isSavedLogin && !getSavedLogin) {
-        const encryptLoginResponse = await SwsyaClient.post<any, ILoginPayload>(API.ecryptLogin, payload);
+      if (state.isSavedLogin && !getSavedLogin) {
+        const encryptLoginResponse = await SwsyaClient.post<any, ILoginPayload>(
+          API.ecryptLogin,
+          payload
+        );
         setSaveLogin({
           owner: encryptLoginResponse.data.data.owner,
-          token: encryptLoginResponse.data.data.token
+          token: encryptLoginResponse.data.data.token,
         });
       }
       setAuthResponse({
@@ -116,21 +134,20 @@ function Login() {
       handleClearLocalStorage(); // Clear saved data
       return;
     }
-
   };
 
   const handleSaveLogin = () => {
-    setState((prev) => ({ ...prev, isSavedLogin: !state.isSavedLogin }))
-  }
+    setState((prev) => ({ ...prev, isSavedLogin: !state.isSavedLogin }));
+  };
 
   const handleClearSaveLogin = () => {
     removeSavedLogin();
-  }
+  };
 
   const handleClearLocalStorage = () => {
     removeAuthResponse();
     removeSavedLogin();
-  }
+  };
 
   useEffect(() => {
     document.title = 'Login | Swerte Saya';
@@ -151,28 +168,43 @@ function Login() {
         <Row justify="center">
           <form onSubmit={handleSubmit(handleLogin)}>
             <Card
-              title={`${getSavedLogin ? `Welcome Back, ${getSavedLogin.owner}!` : "Swerte Saya | Login"}`}
+              title={`${
+                getSavedLogin
+                  ? `Welcome Back, ${getSavedLogin.owner}!`
+                  : 'Swerte Saya | Login'
+              }`}
               bordered={true}
               style={{ width: 280 }}
             >
-              { getSavedLogin ? <div>
-                Your presence is recognized. Would you like to proceed with signing in? 
-                <BtnSignIn title={"Let's go!"} isLoading={state.isLoggingIn} />
-                <BtnNotYou 
-                  event={() => handleClearSaveLogin()}
-                  title={getSavedLogin ? `Not ${getSavedLogin.owner}` : ""}/>
-                </div> : <div>
-              <LoginFormFields
-                control={control}
-                isLoginFailed={state.isLoginFailed}
-              />
-              <Checkbox onChange={() => handleSaveLogin()} style={{ marginTop: 20 }} checked={state.isSavedLogin}>
-                Remember me
-              </Checkbox>
-              <BtnSignIn isLoading={state.isLoggingIn} />
-              </div>}
-              
-            
+              {getSavedLogin ? (
+                <div>
+                  Your presence is recognized. Would you like to proceed with
+                  signing in?
+                  <BtnSignIn
+                    title={"Let's go!"}
+                    isLoading={state.isLoggingIn}
+                  />
+                  <BtnNotYou
+                    event={() => handleClearSaveLogin()}
+                    title={getSavedLogin ? `Not ${getSavedLogin.owner}` : ''}
+                  />
+                </div>
+              ) : (
+                <div>
+                  <LoginFormFields
+                    control={control}
+                    isLoginFailed={state.isLoginFailed}
+                  />
+                  <Checkbox
+                    onChange={() => handleSaveLogin()}
+                    style={{ marginTop: 20 }}
+                    checked={state.isSavedLogin}
+                  >
+                    Remember me
+                  </Checkbox>
+                  <BtnSignIn isLoading={state.isLoggingIn} />
+                </div>
+              )}
             </Card>
           </form>
         </Row>

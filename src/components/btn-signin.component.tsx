@@ -22,7 +22,7 @@ export const BtnSignIn = ({ isLoading, title }: IBtnSignIn) => {
       htmlType="submit"
       block
     >
-      { title ? title : "Sign in" } 
+      {title ? title : 'Sign in'}
     </Button>
   );
 };
@@ -37,7 +37,7 @@ export const BtnNotYou = ({ event, title }: IBtnNotYou) => {
       block
       onClick={() => event()}
     >
-     { title ? title :  "Not you?"  }
+      {title ? title : 'Not you?'}
     </Button>
   );
 };
