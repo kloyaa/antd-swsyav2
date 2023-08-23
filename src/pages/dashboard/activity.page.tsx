@@ -112,9 +112,9 @@ function Activity() {
 
       return {
         'key': item._id,
-        'item-contact': <Paragraph copyable={{ text: contactNo}}>{contactNo}</Paragraph>,
-        'item-address': <Paragraph copyable={{ text: address}}>{address}</Paragraph>,
-        'item-name': <Paragraph copyable={{ text:  name}}>{name}</Paragraph>,
+        'item-contact': <Paragraph copyable={{ text: contactNo}} style={{ padding: "0px", margin: "0px"}}>{contactNo}</Paragraph>,
+        'item-address': <Paragraph copyable={{ text: address}} style={{ padding: "0px", margin: "0px"}}>{address}</Paragraph>,
+        'item-name': <Paragraph copyable={{ text:  name}} style={{ padding: "0px", margin: "0px"}}>{name}</Paragraph>,
         'item-description': item.description,
         'item-datetime': dayjs(item.createdAt).format("MMMM DD; h:mm A"),
       }

@@ -143,7 +143,6 @@ function AdminDashboard() {
         return <div style={{fontWeight: "bolder", marginRight: "10px", color: isRambled ? "purple" : "black"}}>{contentItem.number}</div>
       });
 
-
       return {
         'key': item._id,
         'item-reference': <Paragraph copyable={{ text: reference}} style={{ padding: "0px", margin: "0px"}}>{reference}</Paragraph>,

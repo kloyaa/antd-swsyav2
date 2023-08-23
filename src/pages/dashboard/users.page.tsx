@@ -11,6 +11,8 @@ import { API } from '../../const/api.const';
 import { Modal, Select, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownCircleOutlined } from '@ant-design/icons';
+import { capitalizeName } from '../../utils/util';
+import Paragraph from 'antd/es/typography/Paragraph';
 
 interface IState {
   users: TxnTableContent[],
@@ -88,28 +90,36 @@ function Users() {
       .setAuthToken(getAuthResponse!.token.data)    
       .get<any, any>(API.users, { verified: true })
 
-    const mappedData = getUsersResp.data.map((item:IUser) => ({
-      key: item._id,
-      'item-referrer': item.profile.refferedBy,
-      'item-name': `${item.profile.firstName} ${item.profile.lastName}`,
-      'item-username': item.username,
-      'item-contact': item.profile.contactNumber,
-      'item-address': item.profile.address,
-      'item-status': <Select
-          bordered={false}
-          suffixIcon={<DownCircleOutlined />}
-          defaultValue="action"
-          onChange={(v) => handleChangeStatus(item.profile.user, v)}
-          style={{ width: "100%", textAlign: "center" }}
-          options={[
-            { value: 'action', label: 'Select Action', disabled: true },
-            { value: 'revoke-account', label: 'Revoke Account' },
-            { value: 'hold-account', label: 'Hold', disabled: true  },
-            { value: 'delete-account', label: 'Delete', disabled: true },
-          ]}
-        />
-      // 'item-status': item.profile.verified ? 'Verified' : 'Not Verified',
-    }));
+    const mappedData = getUsersResp.data.map((item:IUser) => {
+      const name = capitalizeName(`${item.profile.firstName} ${item.profile.lastName}`);
+      const contactNo =  item.profile.contactNumber;
+      const address = capitalizeName(item.profile.address);
+      const email = item.email;
+      
+      return {
+        key: item._id,
+        'item-referrer': item.profile.refferedBy,
+        'item-name': <Paragraph copyable={{ text: name }} style={{ padding: "0px", margin: "0px" }}>{name}</Paragraph>,
+        'item-username': item.username,
+        'item-contact': <Paragraph copyable={{ text: contactNo }} style={{ padding: "0px", margin: "0px" }}>{contactNo}</Paragraph>,
+        'item-email': <Paragraph copyable={{ text: email }} style={{ padding: "0px", margin: "0px" }}>{email}</Paragraph>,
+        'item-address': <Paragraph copyable={{ text: address }} style={{ padding: "0px", margin: "0px" }}>{address}</Paragraph>,
+        'item-status': <Select
+            bordered={false}
+            suffixIcon={<DownCircleOutlined />}
+            defaultValue="action"
+            onChange={(v) => handleChangeStatus(item.profile.user, v)}
+            style={{ width: "100%", textAlign: "center" }}
+            options={[
+              { value: 'action', label: 'Select Action', disabled: true },
+              { value: 'revoke-account', label: 'Revoke Account' },
+              { value: 'hold-account', label: 'Hold', disabled: true  },
+              { value: 'delete-account', label: 'Delete', disabled: true },
+            ]}
+          />
+        // 'item-status': item.profile.verified ? 'Verified' : 'Not Verified',
+      }
+    });
 
     setState((prev) => ({
       ...prev,
@@ -203,7 +213,7 @@ function Users() {
     },
     {
       title: 'Email',
-      dataIndex: 'item-address',
+      dataIndex: 'item-email',
       filters: [
         // ...
       ],
