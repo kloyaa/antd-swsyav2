@@ -99,11 +99,11 @@ function Requests() {
       return {
         key: item._id,
         'item-referrer': item.profile.refferedBy,
-        'item-name': <Paragraph copyable={{ text: name}}>{name}</Paragraph>,
+        'item-name': <Paragraph copyable={{ text: name}} style={{ padding: "0px", margin: "0px"}}>{name}</Paragraph>,
         'item-username': item.username,
-        'item-contact': <Paragraph copyable={{ text: contactNo}}>{contactNo}</Paragraph>,
-        'item-email': <Paragraph copyable={{ text: email }}>{email}</Paragraph>,
-        'item-address': <Paragraph copyable={{ text: address}}>{address}</Paragraph>,
+        'item-contact': <Paragraph copyable={{ text: contactNo}} style={{ padding: "0px", margin: "0px"}}>{contactNo}</Paragraph>,
+        'item-email': <Paragraph copyable={{ text: email }} style={{ padding: "0px", margin: "0px"}}>{email}</Paragraph>,
+        'item-address': <Paragraph copyable={{ text: address}} style={{ padding: "0px", margin: "0px"}}>{address}</Paragraph>,
         'item-status': <Select
             bordered={false}
             suffixIcon={<DownCircleOutlined />}

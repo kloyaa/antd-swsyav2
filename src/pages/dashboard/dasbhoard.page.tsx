@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime'; // Import the relativeTime plugin to display relative time
 import 'dayjs/locale/en'; // Import the English locale to display month names in English
 import Paragraph from 'antd/es/typography/Paragraph';
+import { capitalizeName } from '../../utils/util';
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
 
@@ -133,6 +134,7 @@ function AdminDashboard() {
 
       // 
     const transformedData = getTransactionsResp.data.map((item:ITransaction) => {
+      const name = capitalizeName(`${item.profile.firstName} ${item.profile.lastName}`);
       const reference = item.reference;
       const combination = item.content.map((contentItem : IContentItem) => `${contentItem.type} ${contentItem.number}`).join(', ');
       const combinationElement = item.content.map((contentItem : IContentItem) => {
@@ -146,7 +148,7 @@ function AdminDashboard() {
         'key': item._id,
         'item-reference': <Paragraph copyable={{ text: reference}} style={{ padding: "0px", margin: "0px"}}>{reference}</Paragraph>,
         'item-game': item.game,
-        'item-teller': `${item.profile.firstName} ${item.profile.lastName}`,
+        'item-teller': <Paragraph copyable={{ text: name}} style={{ padding: "0px", margin: "0px"}}>{name}</Paragraph>,
         'item-combination': <Paragraph copyable={{ text: combination}} style={{ display: "flex", padding: "0px", margin: "0px"}}>{combinationElement}</Paragraph>,
         'item-time': item.time,
         'item-schedule': dayjs(item.schedule).format("MMMM DD"),
