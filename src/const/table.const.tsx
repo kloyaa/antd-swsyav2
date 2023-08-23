@@ -46,7 +46,7 @@ export const tableDashboardColumn: ColumnsType<TxnTableContent> = [
     dataIndex: 'item-reference',
     filterMode: 'tree',
     filterSearch: true,
-    width: '10%',
+    width: '15%',
   },
   {
     title: 'Game',
@@ -105,7 +105,7 @@ export const tableDashboardColumn: ColumnsType<TxnTableContent> = [
     dataIndex: 'item-amount',
     filterMode: 'tree',
     filterSearch: true,
-    width: '15%',
+    width: '10%',
   },
   {
     title: 'Details',
@@ -249,3 +249,42 @@ export const tableUsersColumn: ColumnsType<TxnTableContent> = [
     width: '10%',
   },
 ];
+
+export const tableResultsColumn: ColumnsType<TxnTableContent> = [
+  {
+    title: 'Game',
+    dataIndex: 'item-game',
+    filters: [
+      // ...
+    ],
+    filterSearch: true,
+    width: '10%',
+  },
+  {
+    title: 'Number',
+    dataIndex: 'item-number',
+    filters: [
+      // ...
+    ],
+    filterSearch: true,
+    width: '10%',
+  },
+  {
+    title: 'Time',
+    dataIndex: 'item-time',
+    filters: [
+      // ...
+    ],
+    filterSearch: true,
+    width: '10%',
+  },
+  {
+    title: 'Wins',
+    dataIndex: 'item-wins',
+    filters: [
+      // ...
+    ],
+    filterSearch: true,
+    width: '10%',
+  },
+]

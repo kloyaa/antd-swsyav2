@@ -20,7 +20,8 @@ import relativeTime from 'dayjs/plugin/relativeTime'; // Import the relativeTime
 import 'dayjs/locale/en'; // Import the English locale to display month names in English
 import Paragraph from 'antd/es/typography/Paragraph';
 import { capitalizeName } from '../../utils/util';
-import { tableDashboardColumn } from '../../const/table.const';
+import { tableDashboardColumn, tableResultsColumn } from '../../const/table.const';
+import { IDailyResult } from '../../interfaces/bet.interface';
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
 
@@ -37,9 +38,11 @@ interface IState {
   stlCount: number;
   txnRevenue: number;
   transactions: ITransaction[];
+  dailyResults: IDailyResult[];
   sessionExpired: boolean;
   isVerifyingToken: boolean;
   isFetchingTransactions: boolean;
+  isFetchingDailyResults: boolean;
 }
 
 function AdminDashboard() {
@@ -56,9 +59,11 @@ function AdminDashboard() {
     stlCount: 0,
     txnRevenue: 0,
     transactions: [],
+    dailyResults: [],
     sessionExpired: false,
     isVerifyingToken: false,
     isFetchingTransactions: false,
+    isFetchingDailyResults: false
   });
 
   const handleGetTransactions = async () => {
@@ -89,6 +94,7 @@ function AdminDashboard() {
             const isRambled = contentItem.rambled;
             return (
               <div
+                key={`${contentItem.time}${contentItem.schedule}`}
                 style={{
                   fontWeight: 'bolder',
                   marginRight: '10px',
@@ -162,6 +168,32 @@ function AdminDashboard() {
     }));
   };
 
+  const handleGetDailyResults = async () => {
+    setState((prev) => ({
+      ...prev,
+      isFetchingDailyResults: true,
+    }));
+
+    const getDailyResultsResp = await SwsyaClient.setAuthToken(
+      getAuthResponse!.token.data
+    ).get<any, getTransactionsParams>(API.dailyResults, {});
+
+
+    const mappedData = getDailyResultsResp.data.map((result: IDailyResult) => ({
+      'key': `${result.time}${result.schedule}`,
+      'item-game': result.type,
+      'item-number': result.number,
+      'item-time': result.time,
+      'item-wins': result.wins.toString(),
+    }));
+    
+    setState((prev) => ({
+      ...prev,
+      dailyResults: mappedData,
+      isFetchingDailyResults: false,
+    }));
+  };
+
   const handleVerifyToken = async (): Promise<boolean> => {
     setState((prev) => ({
       ...prev,
@@ -201,6 +233,7 @@ function AdminDashboard() {
     const authenticated = await handleVerifyToken();
     if (authenticated) {
       await handleGetTransactions();
+      await handleGetDailyResults();
     }
   };
 
@@ -225,13 +258,25 @@ function AdminDashboard() {
           />
         </div>
         <div
-          style={{ marginTop: '20px', marginLeft: '70px', marginRight: '70px' }}
+          style={{ marginTop: '20px', marginLeft: '70px', marginRight: '70px', display: "flex", gap: "20px" }}
         >
-          <TransactionTable
-            columns={tableDashboardColumn}
-            data={state.transactions}
-            loading={state.isFetchingTransactions}
-          />
+          <div style={{width: "20%"}}>
+            <TransactionTable
+              columns={tableResultsColumn}
+              data={state.dailyResults}
+              loading={state.isFetchingDailyResults}
+              caption={"Daily Results"}
+            />
+          </div>
+
+          <div style={{width: "80%"}}>
+            <TransactionTable
+              columns={tableDashboardColumn}
+              data={state.transactions}
+              loading={state.isFetchingTransactions}
+              caption={"Transactions"}
+            />
+          </div>
         </div>
       </div>
     </>

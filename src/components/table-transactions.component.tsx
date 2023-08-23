@@ -6,10 +6,15 @@ interface ITransactionTable {
   columns: ColumnsType<TxnTableContent>;
   data: any[];
   loading?: boolean;
+  caption?: string;
 }
 
 const onChange: TableProps<TxnTableContent>['onChange'] = () => {
 };
+
+const Caption = (data: { caption: string }) => {
+  return data.caption ? <div style={{padding: "10px", textAlign: "left"}}>{data.caption}</div> : <></>
+}
 
 const TransactionTable = (args: ITransactionTable) => (
   <Table
@@ -20,6 +25,7 @@ const TransactionTable = (args: ITransactionTable) => (
     pagination={{ position: ['bottomCenter'] }}
     loading={args.loading || false}
     bordered={true}
+    caption={ <Caption caption={args.caption || ""}/>}
   />
 );
 
