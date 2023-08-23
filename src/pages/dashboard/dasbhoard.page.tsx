@@ -8,8 +8,8 @@ import { IApiResponse } from '../../interfaces/api.interface';
 import useLocalStorage from '../../hooks/useLocalstorage.hook';
 import { currency } from '../../utils/converter.util';
 import type { ColumnsType } from 'antd/es/table';
-import { ITransaction, TxnTableContent } from '../../interfaces/transaction.interface';
-import { Button, Modal } from 'antd';
+import { IContentItem, ITransaction, TxnTableContent } from '../../interfaces/transaction.interface';
+import { Badge, Button, Card, Modal } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { EyeOutlined } from '@ant-design/icons';
 
@@ -17,6 +17,7 @@ import { EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime'; // Import the relativeTime plugin to display relative time
 import 'dayjs/locale/en'; // Import the English locale to display month names in English
+import Paragraph from 'antd/es/typography/Paragraph';
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
 
@@ -44,7 +45,7 @@ const columns: ColumnsType<TxnTableContent> = [
     dataIndex: 'item-reference',
     filterMode: 'tree',
     filterSearch: true,
-    width: '8.5%',
+    width: '10%',
   },
   {
     title: 'Game',
@@ -59,42 +60,48 @@ const columns: ColumnsType<TxnTableContent> = [
     dataIndex: 'item-teller',
     filterMode: 'tree',
     filterSearch: true,
-    width: '12.5%',
+    width: '15%',
   },
   {
-    title: 'Combination',
+    title: <div style={{display: "flex"}}> 
+      <div style={{ marginRight: "50px"}}>Combination</div>
+      <div>
+        <Badge color="purple" text="Rambled" style={{ marginRight: "10px", fontWeight: "normal"}}/>
+        <Badge color="black" text="Target"  style={{ marginRight: "10px", fontWeight: "normal"}}/>
+      </div>
+    </div> ,
     dataIndex: 'item-combination',
     filterMode: 'tree',
     filterSearch: true,
-    width: '26%',
+    width: '30%',
   },
   {
     title: 'Time',
     dataIndex: 'item-time',
     filterMode: 'tree',
     filterSearch: true,
-    width: '12.5%',
+    width: '5%',
   },
   {
     title: 'Schedule',
     dataIndex: 'item-schedule',
     filterMode: 'tree',
     filterSearch: true,
-    width: '12.5%',
+    width: '10%',
   },
   {
     title: 'Amount',
     dataIndex: 'item-amount',
     filterMode: 'tree',
     filterSearch: true,
-    width: '12.5%',
+    width: '15%',
   },
   {
     title: 'Details',
     dataIndex: 'item-details',
     filterMode: 'tree',
     filterSearch: true,
-    width: '12.5%',
+    width: '5%',
   },
 ];
 
@@ -124,17 +131,29 @@ function AdminDashboard() {
       .setAuthToken(getAuthResponse!.token.data)    
       .get<any, getTransactionsParams>(API.transactions, {})
 
-    const transformedData = getTransactionsResp.data.map((item:ITransaction) => ({
-      'key': item._id,
-      'item-reference': item.reference,
-      'item-game': item.game,
-      'item-teller': `${item.profile.firstName} ${item.profile.lastName}`,
-      'item-combination': item.content.map((contentItem : any) => contentItem.number).join(', '),
-      'item-time': item.time,
-      'item-schedule': dayjs(item.schedule).format("MMMM DD"),
-      'item-amount': currency.format(item.content.reduce((total: any, contentItem: any) => total + contentItem.amount, 0),),
-      'item-details': <Button type="dashed" shape="default" icon={<EyeOutlined />} size={"small"}>View more details</Button>
-    }));
+      // 
+    const transformedData = getTransactionsResp.data.map((item:ITransaction) => {
+      const reference = item.reference;
+      const combination = item.content.map((contentItem : IContentItem) => `${contentItem.type} ${contentItem.number}`).join(', ');
+      const combinationElement = item.content.map((contentItem : IContentItem) => {
+        // return <h1>{contentItem.type} {contentItem.number}</h1>
+        const isRambled = contentItem.rambled;
+        return <div style={{fontWeight: "bolder", marginRight: "10px", color: isRambled ? "purple" : "black"}}>{contentItem.number}</div>
+      });
+
+
+      return {
+        'key': item._id,
+        'item-reference': <Paragraph copyable={{ text: reference}} style={{ padding: "0px", margin: "0px"}}>{reference}</Paragraph>,
+        'item-game': item.game,
+        'item-teller': `${item.profile.firstName} ${item.profile.lastName}`,
+        'item-combination': <Paragraph copyable={{ text: combination}} style={{ display: "flex", padding: "0px", margin: "0px"}}>{combinationElement}</Paragraph>,
+        'item-time': item.time,
+        'item-schedule': dayjs(item.schedule).format("MMMM DD"),
+        'item-amount': currency.format(item.content.reduce((total: any, contentItem: any) => total + contentItem.amount, 0),),
+        'item-details': <Button type="dashed" shape="default" icon={<EyeOutlined />} size={"small"}>View more details</Button>
+      }
+    });
 
     setState((prev) => ({
       ...prev,

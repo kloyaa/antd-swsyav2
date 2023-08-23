@@ -18,13 +18,15 @@ export const API = {
 
     // Employee related
     updateUserStatus: `${API_BASE_URL}/api/employee/v1/profile-verification`,
+    
+    // Others
+    activities: `${API_BASE_URL}/api/activity/v1/activities`
 }
 
 export const API_GET_PROFILES = `${API_BASE_URL}/api/clients/v1/profiles`;
 
 // Admin priveleges
 export const API_VERIFY_PROFILE = `${API_BASE_URL}/api/employee/v1/profile-verification`;
-export const API_GET_ACTIVITIES = `${API_BASE_URL}/api/activity/v1/activities`;
 export const API_GET_ALL_BETS = `${API_BASE_URL}/api/bet/v1/bets`;
 
 export const API_CREATE_DAILY_RESULT = `${API_BASE_URL}/api/bet/v1/result`;
