@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react';
 import NavigationBarAdmin from '../../components/nav-admin.component';
 import TransactionTable from '../../components/table-transactions.component';
-import Statistics from '../../components/stats.component';
 import SwsyaClient from '../../utils/http-client.util';
 import { API } from '../../const/api.const';
 import { IApiResponse } from '../../interfaces/api.interface';
 import useLocalStorage from '../../hooks/useLocalstorage.hook';
-import { currency } from '../../utils/converter.util';
 import type { ColumnsType } from 'antd/es/table';
-import { ITransaction, TxnTableContent } from '../../interfaces/transaction.interface';
-import { Button, Modal } from 'antd';
+import { TxnTableContent } from '../../interfaces/transaction.interface';
+import { Modal } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { EyeOutlined } from '@ant-design/icons';
 
 
 import dayjs from 'dayjs';

@@ -9,7 +9,7 @@ import useLocalStorage from '../../hooks/useLocalstorage.hook';
 import { currency } from '../../utils/converter.util';
 import type { ColumnsType } from 'antd/es/table';
 import { IContentItem, ITransaction, TxnTableContent } from '../../interfaces/transaction.interface';
-import { Badge, Button, Card, Modal } from 'antd';
+import { Badge, Button, Modal } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { EyeOutlined } from '@ant-design/icons';
 
