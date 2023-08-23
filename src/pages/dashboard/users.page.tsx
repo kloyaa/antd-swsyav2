@@ -97,7 +97,7 @@ function Users() {
       );
       const contactNo = item.profile.contactNumber;
       const address = capitalizeName(item.profile.address);
-      const email = item.email;
+      const email = item.email.toLowerCase();
 
       return {
         key: item._id,
