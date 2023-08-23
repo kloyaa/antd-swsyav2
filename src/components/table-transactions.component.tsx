@@ -8,12 +8,7 @@ interface ITransactionTable {
   loading?: boolean;
 }
 
-const onChange: TableProps<TxnTableContent>['onChange'] = (
-  pagination,
-  filters,
-  sorter,
-  extra
-) => {
+const onChange: TableProps<TxnTableContent>['onChange'] = () => {
 };
 
 const TransactionTable = (args: ITransactionTable) => (
