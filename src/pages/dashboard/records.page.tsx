@@ -11,9 +11,8 @@ import {
   IContentItem,
   ITransaction,
 } from '../../interfaces/transaction.interface';
-import { Button, Modal, Select } from 'antd';
+import { Button, DatePicker, DatePickerProps, Modal, Select } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime'; // Import the relativeTime plugin to display relative time
 import 'dayjs/locale/en'; // Import the English locale to display month names in English
@@ -23,7 +22,7 @@ import { tableDashboardColumn } from '../../const/table.const';
 import { IDailyResult } from '../../interfaces/bet.interface';
 import { Line } from 'react-chartjs-2';
 import { faker } from '@faker-js/faker';
-import { DownCircleOutlined } from '@ant-design/icons';
+import { DownCircleOutlined,  EyeOutlined, FilterOutlined } from '@ant-design/icons';
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
 import {
@@ -55,6 +54,8 @@ interface IState {
   isVerifyingToken: boolean;
   isFetchingTransactions: boolean;
   isFetchingDailyResults: boolean;
+  schedule: string;
+  isApplyingFilter: boolean;
   gameType: "3D" | "STL"
 }
 
@@ -89,20 +90,29 @@ function PreviewRecords() {
     isVerifyingToken: false,
     isFetchingTransactions: false,
     isFetchingDailyResults: false,
-    gameType: "3D"
+    isApplyingFilter: false,
+    gameType: "3D",
+    schedule: ""
   });
 
-  const handleGetTransactions = async (gameType?: string) => {
+  const handleGetTransactions = async (gameType?: string, schedule?: string) => {
     setState((prev) => ({
       ...prev,
       isFetchingTransactions: true,
     }));
+
+    const apiParams: IGetClientTransactionsParams = {
+      user: location?.state?.client?.user,
+      game: gameType || "3D",
+    };
+
+    if (schedule !== null && schedule !== "") {
+      apiParams.schedule = schedule;
+    }
+
     const getTransactionsResp = await SwsyaClient.setAuthToken(
       getAuthResponse!.token.data
-    ).get<any, IGetClientTransactionsParams>(API.userTransactions, {
-        user: location?.state?.client?.user,
-        game: gameType || "3D"
-    });
+    ).get<any, IGetClientTransactionsParams>(API.userTransactions, apiParams);
 
     const name = capitalizeName(location?.state?.client?.name);
     const transformedData = getTransactionsResp.data.map(
@@ -235,12 +245,26 @@ function PreviewRecords() {
       ...prev,
       gameType: type as any,
     }));
-
-    const authenticated = await handleVerifyToken();
-    if (authenticated) {
-      await handleGetTransactions(type);
-    }
   };
+
+  const handleChangeDate: DatePickerProps['onChange'] = async (_, dateString: any) => {
+    setState((prev) => ({
+      ...prev,
+      schedule: dateString
+    }));
+  };
+
+  const handleApplyFilter = async (gameType: string, schedule: string) => {
+    setState((prev) => ({
+      ...prev,
+      isApplyingFilter: true,
+    }));
+    await handleGetTransactions(gameType, schedule);
+    setState((prev) => ({
+      ...prev,
+      isApplyingFilter: false,
+    }));
+  }
 
   const initState = async () => {
     const authenticated = await handleVerifyToken();
@@ -322,16 +346,32 @@ function PreviewRecords() {
                 height={"70vh"}/>
             </div>
             <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
-              <Select
-                suffixIcon={<DownCircleOutlined />}
-                defaultValue="3D"
-                onChange={(v) => handleChangeGameType(v)}
-                style={{ width: '100%', textAlign: 'center' }}
-                options={[
-                  { value: '3D', label: '3D' },
-                  { value: 'STL', label: 'STL'},
-                ]}
-              />
+              <div style={{  display: "flex", gap: "10px" }}>
+                <div style={{ width: "50%"}}>
+                  <Select
+                      suffixIcon={<DownCircleOutlined />}
+                      defaultValue="3D"
+                      onChange={(v) => handleChangeGameType(v)}
+                      style={{ width: '100%', textAlign: 'center' }}
+                      options={[
+                        { value: '3D', label: '3D' },
+                        { value: 'STL', label: 'STL'},
+                      ]}
+                    />
+                </div>
+                <DatePicker onChange={handleChangeDate} style={{ width: "50%"}}/>
+                <Button
+                  type="primary"
+                  shape="default"
+                  icon={<FilterOutlined />}
+                  size={'middle'}
+                  loading={state.isApplyingFilter}
+                  onClick={() => handleApplyFilter(state.gameType, state.schedule)}
+                >
+                  APPLY FILTER
+                </Button>
+              </div>
+              
               <TransactionTable
                 columns={tableDashboardColumn}
                 data={state.transactions}
