@@ -22,8 +22,20 @@ import Paragraph from 'antd/es/typography/Paragraph';
 import { capitalizeName } from '../../utils/util';
 import { tableDashboardColumn, tableResultsColumn } from '../../const/table.const';
 import { IDailyResult } from '../../interfaces/bet.interface';
+import { Line } from 'react-chartjs-2';
+import { faker } from '@faker-js/faker';
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 
 interface getTransactionsParams {
   schedule?: string;
@@ -44,6 +56,16 @@ interface IState {
   isFetchingTransactions: boolean;
   isFetchingDailyResults: boolean;
 }
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 function AdminDashboard() {
   const { value: getAuthResponse } = useLocalStorage<IApiResponse | null>(
@@ -89,12 +111,12 @@ function AdminDashboard() {
           )
           .join(', ');
         const combinationElement = item.content.map(
-          (contentItem: IContentItem) => {
+          (contentItem: IContentItem, index: number) => {
             // return <h1>{contentItem.type} {contentItem.number}</h1>
             const isRambled = contentItem.rambled;
             return (
               <div
-                key={`${contentItem.time}${contentItem.schedule}`}
+                key={index}
                 style={{
                   fontWeight: 'bolder',
                   marginRight: '10px',
@@ -106,7 +128,6 @@ function AdminDashboard() {
             );
           }
         );
-
         return {
           key: item._id,
           'item-reference': (
@@ -237,9 +258,36 @@ function AdminDashboard() {
     }
   };
 
+
+  const labels = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: 'Revenue',
+        data: labels.map(() => faker.number.int({ min: 0, max: 55000 })),
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        borderWidth: 1,
+      },
+      {
+        label: 'Income',
+        data: labels.map(() => faker.number.int({ min: 0, max: 55000 })),
+        borderColor: '#321580',
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
   useEffect(() => {
     document.title = 'Dashboard | Swerte Saya';
     initState();
+
+    console.log(labels.map(() => faker.number.int({ min: -1000, max: 1000 })))
   }, []);
 
   return (
@@ -270,12 +318,43 @@ function AdminDashboard() {
           </div>
 
           <div style={{width: "80%"}}>
-            <TransactionTable
-              columns={tableDashboardColumn}
-              data={state.transactions}
-              loading={state.isFetchingTransactions}
-              caption={"Transactions"}
-            />
+            <div style={{ backgroundColor: "white", borderRadius: "20px", border: "0.5px solid #f5f5f5" }}>
+            <Line options={{
+                responsive: true,
+                layout: {
+                  padding: {
+                    left: 20, 
+                    right: 20,
+                    bottom: 10,
+                    top: 10
+                  },
+                },
+                animations: {
+                  tension: {
+                    duration: 1000,
+                    easing: 'linear',
+                    from: 1,
+                    to: 0,
+                    loop: true
+                  }
+                },
+                plugins: {
+                  legend: {
+                    position: 'top' as const,
+                  },
+                },
+              }} 
+              data={data}  
+              height={"50vh"}/>
+            </div>
+            <div style={{ marginTop: "20px" }}>
+              <TransactionTable
+                columns={tableDashboardColumn}
+                data={state.transactions}
+                loading={state.isFetchingTransactions}
+                caption={"Transactions"}
+              />
+            </div>
           </div>
         </div>
       </div>
