@@ -5,6 +5,7 @@ import AdminDashboard from './pages/dashboard/dasbhoard.page';
 import UsersActivity from './pages/dashboard/activity.page';
 import Users from './pages/dashboard/users.page';
 import Requests from './pages/dashboard/requests.page';
+import PreviewRecords from './pages/dashboard/records.page';
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
   {
     path: '/a/requests',
     element: <Requests />,
+  },
+  {
+    path: '/a/users/record',
+    element: <PreviewRecords />,
   },
 ]);
 

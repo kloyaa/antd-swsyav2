@@ -7,12 +7,13 @@ import SwsyaClient from '../../utils/http-client.util';
 import useLocalStorage from '../../hooks/useLocalstorage.hook';
 import { IApiResponse } from '../../interfaces/api.interface';
 import { API } from '../../const/api.const';
-import { Modal, Select, message } from 'antd';
+import { Button, Modal, Select, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownCircleOutlined } from '@ant-design/icons';
 import { capitalizeName } from '../../utils/util';
 import Paragraph from 'antd/es/typography/Paragraph';
 import { tableUsersColumn } from '../../const/table.const';
+import { EyeOutlined } from '@ant-design/icons';
 
 interface IState {
   users: TxnTableContent[];
@@ -134,6 +135,23 @@ function Users() {
           >
             {address}
           </Paragraph>
+        ),
+        'item-records': (
+          <Button
+            type="dashed"
+            shape="default"
+            icon={<EyeOutlined />}
+            size={'small'}
+            style={{ fontSize: "12px" }}
+            onClick={() => navigate("/a/users/record", { state: {
+              client: { 
+                user: item._id,
+                name
+              }
+            }})}
+          >
+            VIEW
+          </Button>
         ),
         'item-status': (
           <Select

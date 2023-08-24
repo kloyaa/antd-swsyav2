@@ -12,14 +12,14 @@ import {
   ITransaction,
 } from '../../interfaces/transaction.interface';
 import { Button, Modal } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime'; // Import the relativeTime plugin to display relative time
 import 'dayjs/locale/en'; // Import the English locale to display month names in English
 import Paragraph from 'antd/es/typography/Paragraph';
 import { capitalizeName } from '../../utils/util';
-import { tableDashboardColumn, tableResultsColumn } from '../../const/table.const';
+import { tableDashboardColumn } from '../../const/table.const';
 import { IDailyResult } from '../../interfaces/bet.interface';
 import { Line } from 'react-chartjs-2';
 import { faker } from '@faker-js/faker';
@@ -36,10 +36,10 @@ import {
   Legend,
 } from 'chart.js';
 
-interface getTransactionsParams {
-  schedule?: string;
-  game?: string;
-  time?: string;
+interface IGetClientTransactionsParams {
+    schedule?: string;
+    game?: string;
+    user?: string;
 }
 
 interface IState {
@@ -66,13 +66,15 @@ ChartJS.register(
   Legend
 );
 
-function AdminDashboard() {
+function PreviewRecords() {
   const { value: getAuthResponse } = useLocalStorage<IApiResponse | null>(
     'auth_response',
     null
   );
 
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [state, setState] = useState<IState>({
     txnTotal: 0,
     txnCount: 0,
@@ -94,14 +96,15 @@ function AdminDashboard() {
     }));
     const getTransactionsResp = await SwsyaClient.setAuthToken(
       getAuthResponse!.token.data
-    ).get<any, getTransactionsParams>(API.transactions, {});
+    ).get<any, IGetClientTransactionsParams>(API.userTransactions, {
+        user: location?.state?.client?.user,
+        game: "3D"
+    });
 
-    //
+    const name = capitalizeName(location?.state?.client?.name);
     const transformedData = getTransactionsResp.data.map(
       (item: ITransaction) => {
-        const name = capitalizeName(
-          `${item.profile.firstName} ${item.profile.lastName}`
-        );
+   
         const reference = item.reference;
         const combination = item.content
           .map(
@@ -189,32 +192,6 @@ function AdminDashboard() {
     }));
   };
 
-  const handleGetDailyResults = async () => {
-    setState((prev) => ({
-      ...prev,
-      isFetchingDailyResults: true,
-    }));
-
-    const getDailyResultsResp = await SwsyaClient.setAuthToken(
-      getAuthResponse!.token.data
-    ).get<any, getTransactionsParams>(API.dailyResults, {});
-
-
-    const mappedData = getDailyResultsResp.data.map((result: IDailyResult) => ({
-      'key': `${result.time}${result.schedule}`,
-      'item-game': result.type,
-      'item-number': result.number,
-      'item-time': result.time,
-      'item-wins': result.wins.toString(),
-    }));
-    
-    setState((prev) => ({
-      ...prev,
-      dailyResults: mappedData,
-      isFetchingDailyResults: false,
-    }));
-  };
-
   const handleVerifyToken = async (): Promise<boolean> => {
     setState((prev) => ({
       ...prev,
@@ -254,15 +231,14 @@ function AdminDashboard() {
     const authenticated = await handleVerifyToken();
     if (authenticated) {
       await handleGetTransactions();
-      await handleGetDailyResults();
     }
   };
-
 
   const labels = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
+
   const data = {
     labels,
     datasets: [
@@ -273,18 +249,11 @@ function AdminDashboard() {
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
         borderWidth: 1,
       },
-      {
-        label: 'Income',
-        data: labels.map(() => faker.number.int({ min: 0, max: 55000 })),
-        borderColor: '#321580',
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-        borderWidth: 1,
-      },
     ],
   };
 
   useEffect(() => {
-    document.title = 'Dashboard | Swerte Saya';
+    document.title = `${location?.state?.client?.name} | Swerte Saya`;
     initState();
 
     console.log(labels.map(() => faker.number.int({ min: -1000, max: 1000 })))
@@ -306,60 +275,49 @@ function AdminDashboard() {
           />
         </div>
         <div
-          style={{ marginTop: '20px', marginLeft: '70px', marginRight: '70px', display: "flex", gap: "20px" }}
+          style={{ marginTop: '20px', marginLeft: '70px', marginRight: '70px' }}
         >
-          <div style={{width: "20%"}}>
-            <TransactionTable
-              columns={tableResultsColumn}
-              data={state.dailyResults}
-              loading={state.isFetchingDailyResults}
-              caption={"Daily Results"}
-            />
-          </div>
-
-          <div style={{width: "80%"}}>
             <div style={{ backgroundColor: "white", borderRadius: "20px", border: "0.5px solid #f5f5f5" }}>
-            <Line options={{
-                responsive: true,
-                layout: {
-                  padding: {
-                    left: 20, 
-                    right: 20,
-                    bottom: 10,
-                    top: 10
-                  },
-                },
-                animations: {
-                  tension: {
-                    duration: 1000,
-                    easing: 'linear',
-                    from: 1,
-                    to: 0,
-                    loop: true
-                  }
-                },
-                plugins: {
-                  legend: {
-                    position: 'top' as const,
-                  },
-                },
-              }} 
-              data={data}  
-              height={"50vh"}/>
+                <Line options={{
+                    responsive: true,
+                    layout: {
+                    padding: {
+                        left: 20, 
+                        right: 20,
+                        bottom: 10,
+                        top: 10
+                    },
+                    },
+                    animations: {
+                    tension: {
+                        duration: 1000,
+                        easing: 'linear',
+                        from: 1,
+                        to: 0,
+                        loop: true
+                    }
+                    },
+                    plugins: {
+                    legend: {
+                        position: 'top' as const,
+                    },
+                    },
+                }} 
+                data={data}  
+                height={"70vh"}/>
             </div>
             <div style={{ marginTop: "20px" }}>
               <TransactionTable
                 columns={tableDashboardColumn}
                 data={state.transactions}
                 loading={state.isFetchingTransactions}
-                caption={"Transactions"}
+                caption={`Transactions of ${location.state.client.name}`}
               />
             </div>
-          </div>
         </div>
       </div>
     </>
   );
 }
 
-export default AdminDashboard;
+export default PreviewRecords;

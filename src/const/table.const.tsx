@@ -200,7 +200,7 @@ export const tableUsersColumn: ColumnsType<TxnTableContent> = [
       // ...
     ],
     filterSearch: true,
-    width: '20%',
+    width: '15%',
   },
   {
     title: 'Username',
@@ -210,16 +210,12 @@ export const tableUsersColumn: ColumnsType<TxnTableContent> = [
     filters: [
       // ...
     ],
-    width: '15%',
+    width: '10%',
   },
   {
     title: 'Mobile No.',
     dataIndex: 'item-contact',
-    filters: [
-      // ...
-    ],
-    filterSearch: true,
-    width: '15%',
+    width: '10%',
   },
   {
     title: 'Email',
@@ -228,7 +224,7 @@ export const tableUsersColumn: ColumnsType<TxnTableContent> = [
       // ...
     ],
     filterSearch: true,
-    width: '15%',
+    width: '20%',
   },
   {
     title: 'Home Address',
@@ -237,7 +233,12 @@ export const tableUsersColumn: ColumnsType<TxnTableContent> = [
       // ...
     ],
     filterSearch: true,
-    width: '15%',
+    width: '20%',
+  },
+  {
+    title: 'Records',
+    dataIndex: 'item-records',
+    width: '5%',
   },
   {
     title: 'Status',

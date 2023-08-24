@@ -15,6 +15,8 @@ export const API = {
 
   // Transactions related
   transactions: `${API_BASE_URL}/api/transaction/v1/all`,
+  userTransactions: `${API_BASE_URL}/api/transaction/v1/client`,
+
 
   // Employee related
   updateUserStatus: `${API_BASE_URL}/api/employee/v1/profile-verification`,

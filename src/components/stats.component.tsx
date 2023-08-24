@@ -23,7 +23,7 @@ const Statistics = (data: IStatistics) => (
           style={{ background: 'white', padding: '20px', borderRadius: '10px' }}
         />
       </Col>
-      <Col>
+      <Col style={{ opacity: data.txnRevenue === 0 ? 0.3 : 1}}>
         <Statistic
           title="Income (PHP)"
           value={data.txnRevenue}
