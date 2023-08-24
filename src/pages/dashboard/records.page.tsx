@@ -11,7 +11,7 @@ import {
   IContentItem,
   ITransaction,
 } from '../../interfaces/transaction.interface';
-import { Button, Modal } from 'antd';
+import { Button, Modal, Select } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -23,6 +23,7 @@ import { tableDashboardColumn } from '../../const/table.const';
 import { IDailyResult } from '../../interfaces/bet.interface';
 import { Line } from 'react-chartjs-2';
 import { faker } from '@faker-js/faker';
+import { DownCircleOutlined } from '@ant-design/icons';
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
 import {
@@ -54,6 +55,7 @@ interface IState {
   isVerifyingToken: boolean;
   isFetchingTransactions: boolean;
   isFetchingDailyResults: boolean;
+  gameType: "3D" | "STL"
 }
 
 ChartJS.register(
@@ -86,10 +88,11 @@ function PreviewRecords() {
     sessionExpired: false,
     isVerifyingToken: false,
     isFetchingTransactions: false,
-    isFetchingDailyResults: false
+    isFetchingDailyResults: false,
+    gameType: "3D"
   });
 
-  const handleGetTransactions = async () => {
+  const handleGetTransactions = async (gameType?: string) => {
     setState((prev) => ({
       ...prev,
       isFetchingTransactions: true,
@@ -98,7 +101,7 @@ function PreviewRecords() {
       getAuthResponse!.token.data
     ).get<any, IGetClientTransactionsParams>(API.userTransactions, {
         user: location?.state?.client?.user,
-        game: "3D"
+        game: gameType || "3D"
     });
 
     const name = capitalizeName(location?.state?.client?.name);
@@ -227,6 +230,18 @@ function PreviewRecords() {
     return true;
   };
 
+  const handleChangeGameType = async (type: string) => {
+    setState((prev) => ({
+      ...prev,
+      gameType: type as any,
+    }));
+
+    const authenticated = await handleVerifyToken();
+    if (authenticated) {
+      await handleGetTransactions(type);
+    }
+  };
+
   const initState = async () => {
     const authenticated = await handleVerifyToken();
     if (authenticated) {
@@ -306,7 +321,17 @@ function PreviewRecords() {
                 data={data}  
                 height={"70vh"}/>
             </div>
-            <div style={{ marginTop: "20px" }}>
+            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <Select
+                suffixIcon={<DownCircleOutlined />}
+                defaultValue="3D"
+                onChange={(v) => handleChangeGameType(v)}
+                style={{ width: '100%', textAlign: 'center' }}
+                options={[
+                  { value: '3D', label: '3D' },
+                  { value: 'STL', label: 'STL'},
+                ]}
+              />
               <TransactionTable
                 columns={tableDashboardColumn}
                 data={state.transactions}
