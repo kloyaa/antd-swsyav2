@@ -11,7 +11,7 @@ import {
   IContentItem,
   ITransaction,
 } from '../../interfaces/transaction.interface';
-import { Button, DatePicker, DatePickerProps, Modal, Select } from 'antd';
+import { Button, DatePicker, DatePickerProps, Modal, Select, TimePicker, TimePickerProps } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime'; // Import the relativeTime plugin to display relative time
@@ -40,6 +40,7 @@ interface IGetClientTransactionsParams {
     schedule?: string;
     game?: string;
     user?: string;
+    time?: string;
 }
 
 interface IState {
@@ -55,6 +56,7 @@ interface IState {
   isFetchingTransactions: boolean;
   isFetchingDailyResults: boolean;
   schedule: string;
+  time: string;
   isApplyingFilter: boolean;
   gameType: "3D" | "STL"
 }
@@ -92,10 +94,11 @@ function PreviewRecords() {
     isFetchingDailyResults: false,
     isApplyingFilter: false,
     gameType: "3D",
-    schedule: ""
+    schedule: "",
+    time: ""
   });
 
-  const handleGetTransactions = async (gameType?: string, schedule?: string) => {
+  const handleGetTransactions = async (gameType?: string, schedule?: string, time?: string) => {
     setState((prev) => ({
       ...prev,
       isFetchingTransactions: true,
@@ -104,9 +107,10 @@ function PreviewRecords() {
     const apiParams: IGetClientTransactionsParams = {
       user: location?.state?.client?.user,
       game: gameType || "3D",
+      time: time || ""
     };
 
-    if (schedule !== null && schedule !== "") {
+    if (schedule !== null && schedule !== "" && schedule != undefined) {
       apiParams.schedule = schedule;
     }
 
@@ -254,12 +258,20 @@ function PreviewRecords() {
     }));
   };
 
-  const handleApplyFilter = async (gameType: string, schedule: string) => {
+  const handleChangeTime: TimePickerProps['onChange'] = async (_, time: any) => {
+    setState((prev) => ({
+      ...prev,
+      time
+    }));
+  };
+
+  const handleApplyFilter = async (gameType: string, schedule: string, time: string) => {
+    console.log(gameType, schedule, time)
     setState((prev) => ({
       ...prev,
       isApplyingFilter: true,
     }));
-    await handleGetTransactions(gameType, schedule);
+    await handleGetTransactions(gameType, schedule, time);
     setState((prev) => ({
       ...prev,
       isApplyingFilter: false,
@@ -294,8 +306,6 @@ function PreviewRecords() {
   useEffect(() => {
     document.title = `${location?.state?.client?.name} | Swerte Saya`;
     initState();
-
-    console.log(labels.map(() => faker.number.int({ min: -1000, max: 1000 })))
   }, []);
 
   return (
@@ -359,14 +369,19 @@ function PreviewRecords() {
                       ]}
                     />
                 </div>
-                <DatePicker onChange={handleChangeDate} style={{ width: "50%"}}/>
+                <DatePicker onChange={handleChangeDate} style={{ width: "25%"}}/>
+                <TimePicker 
+                  onChange={(v, t) => { handleChangeTime(v, t) }} 
+                  showSecond={false} 
+                  format={"h:mm A"}
+                  style={{ width: "25%"}}/>
                 <Button
                   type="primary"
                   shape="default"
                   icon={<FilterOutlined />}
                   size={'middle'}
                   loading={state.isApplyingFilter}
-                  onClick={() => handleApplyFilter(state.gameType, state.schedule)}
+                  onClick={() => handleApplyFilter(state.gameType, state.schedule, state.time)}
                 >
                   APPLY FILTER
                 </Button>
