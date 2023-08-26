@@ -11,7 +11,7 @@ import {
   IContentItem,
   ITransaction,
 } from '../../interfaces/transaction.interface';
-import { Button, Modal } from 'antd';
+import { Button, Divider, Modal, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -35,6 +35,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import Countdown, { CountdownProps } from 'antd/es/statistic/Countdown';
+import { subscriptionExpiry, systemExtraCharges, systemStatus } from '../../const/const';
 
 interface getTransactionsParams {
   schedule?: string;
@@ -54,6 +56,10 @@ interface IState {
   isVerifyingToken: boolean;
   isFetchingTransactions: boolean;
   isFetchingDailyResults: boolean;
+  subscriptionExpiry: number;
+  subscriptionExpiryInDate: string;
+  systemUsage: string;
+  systemExtraCharges: string;
 }
 
 ChartJS.register(
@@ -65,6 +71,8 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+const { Text } = Typography;
 
 function AdminDashboard() {
   const { value: getAuthResponse } = useLocalStorage<IApiResponse | null>(
@@ -84,7 +92,11 @@ function AdminDashboard() {
     sessionExpired: false,
     isVerifyingToken: false,
     isFetchingTransactions: false,
-    isFetchingDailyResults: false
+    isFetchingDailyResults: false,
+    subscriptionExpiry: 0,
+    subscriptionExpiryInDate: "2023-09-13",
+    systemUsage: "0",
+    systemExtraCharges: "0"
   });
 
   const handleGetTransactions = async () => {
@@ -250,7 +262,21 @@ function AdminDashboard() {
     return true;
   };
 
+  const getSystemStatus = () => {
+    const dateString = subscriptionExpiry; // Replace with your actual environment variable name
+    const dateObject = new Date(dateString);
+    setState((prev) => ({
+      ...prev,
+      subscriptionExpiry: Number(dateObject),
+      subscriptionExpiryInDate: dateString,
+      systemUsage: systemStatus,
+      systemExtraCharges: systemExtraCharges
+    }))
+  }
+  
   const initState = async () => {
+    getSystemStatus();
+
     const authenticated = await handleVerifyToken();
     if (authenticated) {
       await handleGetTransactions();
@@ -283,6 +309,10 @@ function AdminDashboard() {
     ],
   };
 
+  const onSubscriptionFinished: CountdownProps['onFinish'] = () => {
+    console.log('finished!');
+  };
+  
   useEffect(() => {
     document.title = 'Dashboard | Swerte Saya';
     initState();
@@ -315,6 +345,29 @@ function AdminDashboard() {
               loading={state.isFetchingDailyResults}
               caption={"Daily Results"}
             />
+
+            <div style={{ backgroundColor: "white", borderRadius: "5px", border: "0.5px solid #f5f5f5", padding: "20px", marginTop: "10px" }}>
+              <div style={{ display: "flex", flexDirection: "column", marginBottom: "20px"}}>
+                <Text  style={{ color: "gray", fontSize: "14px", fontWeight: "lighter"}}>System Maintenance Expiry</Text>
+                <Text style={{ fontSize: "22px"}}>{dayjs(state.subscriptionExpiryInDate).format('MMMM DD, YYYY')}</Text>
+              </div>
+              <Countdown title="Hours Remaining" value={state.subscriptionExpiry} onFinish={onSubscriptionFinished} />
+              <Divider />
+              <div style={{ display: "flex", justifyContent: "space-between",  gap: "10px", flexDirection: "column", } }>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <Text  style={{ color: "gray", fontSize: "14px", fontWeight: "lighter"}}>Usage (Overall)</Text>
+                  <Text style={{ fontSize: "22px"}}>{state.systemUsage}/100</Text>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <Text  style={{ color: "gray", fontSize: "14px", fontWeight: "lighter"}}>Status</Text>
+                  <Text style={{ fontSize: "22px"}}>Good</Text>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <Text  style={{ color: "gray", fontSize: "14px", fontWeight: "lighter"}}>Charges to Pay</Text>
+                  <Text style={{ fontSize: "22px"}}>${state.systemExtraCharges}</Text>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div style={{width: "80%"}}>

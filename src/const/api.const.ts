@@ -25,7 +25,8 @@ export const API = {
   activities: `${API_BASE_URL}/api/activity/v1/activities`,
 
   // Bet
-  dailyResults: `${API_BASE_URL}/api/bet/v1/daily-result`
+  dailyResults: `${API_BASE_URL}/api/bet/v1/daily-result`,
+
 };
 
 export const API_GET_PROFILES = `${API_BASE_URL}/api/clients/v1/profiles`;

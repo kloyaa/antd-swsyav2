@@ -67,10 +67,6 @@ const AdminNavbar: React.FC = () => {
               label: 'Change Password',
               key: 'setting:3',
             },
-            {
-              label: 'Sign out',
-              key: 'setting:4',
-            },
           ],
         },
         {
