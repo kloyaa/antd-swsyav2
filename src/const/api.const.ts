@@ -16,6 +16,7 @@ export const API = {
   // Transactions related
   transactions: `${API_BASE_URL}/api/transaction/v1/all`,
   transactionData: `${API_BASE_URL}/api/transaction/v1/data`,
+  myTransactionData: `${API_BASE_URL}/api/me/transaction/v1/data`,
   userTransactions: `${API_BASE_URL}/api/transaction/v1/client`,
 
 

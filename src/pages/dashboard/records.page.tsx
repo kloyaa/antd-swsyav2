@@ -21,7 +21,6 @@ import { capitalizeName } from '../../utils/util';
 import { tableDashboardColumn } from '../../const/table.const';
 import { IDailyResult } from '../../interfaces/bet.interface';
 import { Line } from 'react-chartjs-2';
-import { faker } from '@faker-js/faker';
 import { DownCircleOutlined,  EyeOutlined, FilterOutlined } from '@ant-design/icons';
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
@@ -59,6 +58,9 @@ interface IState {
   time: string;
   isApplyingFilter: boolean;
   gameType: "3D" | "STL"
+  chartLabels: string[];
+  chartValue: number[];
+  chartIncome: number[];
 }
 
 ChartJS.register(
@@ -95,7 +97,10 @@ function PreviewRecords() {
     isApplyingFilter: false,
     gameType: "3D",
     schedule: "",
-    time: ""
+    time: "",
+    chartLabels: [],
+    chartValue: [],
+    chartIncome: []
   });
 
   const handleGetTransactions = async (gameType?: string, schedule?: string, time?: string) => {
@@ -278,29 +283,28 @@ function PreviewRecords() {
     }));
   }
 
+  const handleGetTransactionData = async () => {
+    const getTransactionDataResp = await SwsyaClient.setAuthToken(
+      getAuthResponse!.token.data
+    ).get<any, any>(API.myTransactionData, { user: location?.state?.client?.user });
+    setState((prev) => ({
+      ...prev,
+      chartLabels: getTransactionDataResp.data.map((v: any) => { return dayjs(v.schedule).format("MMM DD") }),
+      chartValue: getTransactionDataResp.data.map((v: any) => { 
+        return Number(v.total) 
+      }),
+      chartIncome: getTransactionDataResp.data.map((v: any) => { 
+        return Number(v.total) * 0.75
+      })
+    }));
+  }
+
   const initState = async () => {
     const authenticated = await handleVerifyToken();
     if (authenticated) {
+      await handleGetTransactionData();
       await handleGetTransactions();
     }
-  };
-
-  const labels = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: 'Revenue',
-        data: labels.map(() => faker.number.int({ min: 0, max: 55000 })),
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        borderWidth: 1,
-      },
-    ],
   };
 
   useEffect(() => {
@@ -341,7 +345,7 @@ function PreviewRecords() {
                     tension: {
                         duration: 1000,
                         easing: 'linear',
-                        from: 1,
+                        from: 0.2,
                         to: 0,
                         loop: true
                     }
@@ -352,7 +356,25 @@ function PreviewRecords() {
                     },
                     },
                 }} 
-                data={data}  
+                data={{
+                  labels: state.chartLabels,
+                  datasets: [
+                    {
+                      label: 'Revenue',
+                      data: state.chartValue,
+                      borderColor: 'rgb(255, 99, 132)',
+                      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                      borderWidth: 1,
+                    },
+                    {
+                      label: 'Income',
+                      data: state.chartIncome,
+                      borderColor: '#321580',
+                      backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                      borderWidth: 1,
+                    },
+                  ],
+                }}   
                 height={"70vh"}/>
             </div>
             <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>

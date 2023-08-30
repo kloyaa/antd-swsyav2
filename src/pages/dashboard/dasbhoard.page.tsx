@@ -207,7 +207,6 @@ function AdminDashboard() {
   };
 
   const handleGetTransactionData = async () => {
-
     const getTransactionDataResp = await SwsyaClient.setAuthToken(
       getAuthResponse!.token.data
     ).get<any, getTransactionsParams>(API.transactionData, {});
@@ -221,7 +220,6 @@ function AdminDashboard() {
         return Number(v.total) * 0.75
       })
     }));
-
   }
 
   const handleGetDailyResults = async () => {
@@ -385,7 +383,7 @@ function AdminDashboard() {
                   tension: {
                     duration: 1000,
                     easing: 'linear',
-                    from: 0.5,
+                    from: 0.2,
                     to: 0,
                     loop: true
                   }
