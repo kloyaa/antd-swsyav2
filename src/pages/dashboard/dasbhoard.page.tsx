@@ -22,7 +22,6 @@ import { capitalizeName } from '../../utils/util';
 import { tableDashboardColumn, tableResultsColumn } from '../../const/table.const';
 import { IDailyResult } from '../../interfaces/bet.interface';
 import { Line } from 'react-chartjs-2';
-import { faker } from '@faker-js/faker';
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
 import {
@@ -52,6 +51,9 @@ interface IState {
   txnRevenue: number;
   transactions: ITransaction[];
   dailyResults: IDailyResult[];
+  chartLabels: string[];
+  chartValue: number[];
+  chartIncome: number[];
   sessionExpired: boolean;
   isVerifyingToken: boolean;
   isFetchingTransactions: boolean;
@@ -96,7 +98,10 @@ function AdminDashboard() {
     subscriptionExpiry: 0,
     subscriptionExpiryInDate: "2023-09-13",
     systemUsage: "0",
-    systemExtraCharges: "0"
+    systemExtraCharges: "0",
+    chartLabels: [],
+    chartValue: [],
+    chartIncome: []
   });
 
   const handleGetTransactions = async () => {
@@ -201,6 +206,24 @@ function AdminDashboard() {
     }));
   };
 
+  const handleGetTransactionData = async () => {
+
+    const getTransactionDataResp = await SwsyaClient.setAuthToken(
+      getAuthResponse!.token.data
+    ).get<any, getTransactionsParams>(API.transactionData, {});
+    setState((prev) => ({
+      ...prev,
+      chartLabels: getTransactionDataResp.data.map((v: any) => { return dayjs(v.schedule).format("MMM DD") }),
+      chartValue: getTransactionDataResp.data.map((v: any) => { 
+        return Number(v.total) 
+      }),
+      chartIncome: getTransactionDataResp.data.map((v: any) => { 
+        return Number(v.total) * 0.75
+      })
+    }));
+
+  }
+
   const handleGetDailyResults = async () => {
     setState((prev) => ({
       ...prev,
@@ -280,34 +303,12 @@ function AdminDashboard() {
     const authenticated = await handleVerifyToken();
     if (authenticated) {
       await handleGetTransactions();
+      await handleGetTransactionData();
       await handleGetDailyResults();
     }
   };
 
 
-  const labels = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: 'Revenue',
-        data: labels.map(() => faker.number.int({ min: 0, max: 55000 })),
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        borderWidth: 1,
-      },
-      {
-        label: 'Income',
-        data: labels.map(() => faker.number.int({ min: 0, max: 55000 })),
-        borderColor: '#321580',
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-        borderWidth: 1,
-      },
-    ],
-  };
 
   const onSubscriptionFinished: CountdownProps['onFinish'] = () => {
     console.log('finished!');
@@ -316,8 +317,6 @@ function AdminDashboard() {
   useEffect(() => {
     document.title = 'Dashboard | Swerte Saya';
     initState();
-
-    console.log(labels.map(() => faker.number.int({ min: -1000, max: 1000 })))
   }, []);
 
   return (
@@ -386,7 +385,7 @@ function AdminDashboard() {
                   tension: {
                     duration: 1000,
                     easing: 'linear',
-                    from: 1,
+                    from: 0.5,
                     to: 0,
                     loop: true
                   }
@@ -397,7 +396,25 @@ function AdminDashboard() {
                   },
                 },
               }} 
-              data={data}  
+              data={{
+                labels: state.chartLabels,
+                datasets: [
+                  {
+                    label: 'Revenue',
+                    data: state.chartValue,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderWidth: 1,
+                  },
+                  {
+                    label: 'Income',
+                    data: state.chartIncome,
+                    borderColor: '#321580',
+                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                    borderWidth: 1,
+                  },
+                ],
+              }}  
               height={"50vh"}/>
             </div>
             <div style={{ marginTop: "20px" }}>
